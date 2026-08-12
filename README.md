@@ -1,9 +1,70 @@
-# 2026_aio2_python-basic
+<div align="center">
 
-AI 오케스트레이션 부트캠프 2기 — 파이썬 기초 학습 저장소입니다.
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=With%20%26%20Without&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=Designing%20the%20space%20between%20humans%20and%20AI&descSize=16&descAlignY=58" width="100%" />
+
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=22&duration=3000&pause=1200&color=8A7CFF&center=true&vCenter=true&width=700&lines=%EC%BD%94%EB%93%9C%EB%B3%B4%EB%8B%A4+%EA%B5%AC%EC%A1%B0%EB%A5%BC+%EB%A8%BC%EC%A0%80+%EA%B7%B8%EB%A6%BD%EB%8B%88%EB%8B%A4;%EB%8F%84%EA%B5%AC%EB%93%A4%EC%9D%B4+%EC%84%9C%EB%A1%9C+%EB%8C%80%ED%99%94%ED%95%98%EB%8A%94+%EB%B0%A9%EC%8B%9D%EC%9D%84+%EC%84%A4%EA%B3%84%ED%95%A9%EB%8B%88%EB%8B%A4;Something+quiet+is+being+built+here." alt="intro" />
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/STATUS-IN__PROGRESS-8A7CFF?style=for-the-badge&labelColor=0D1117" />
+<img src="https://img.shields.io/badge/FOCUS-AI__ORCHESTRATION-6FDCE3?style=for-the-badge&labelColor=0D1117" />
+<img src="https://img.shields.io/badge/MODE-BUILDING__IN__PUBLIC-F5A9B8?style=for-the-badge&labelColor=0D1117" />
+
+</div>
+
+<br/>
+
+> **코드보다 구조를, 기능보다 가능성을 먼저 그립니다.**
+> 하나의 뛰어난 도구보다, 도구들이 서로를 부르는 **흐름**이 더 많은 것을 바꾼다고 믿습니다.
+> 지금은 그 흐름을 설계하는 법을 바닥부터 배우는 중입니다.
+
+<br/>
+
+## 🧭 지금 그리고 있는 것
+
+아직 이름을 붙이지 않은 무언가를 만들고 있습니다. 형태는 이렇습니다 —
+
+```mermaid
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor':'#1a1b27', 'primaryTextColor':'#c9c9c9', 'primaryBorderColor':'#8A7CFF', 'lineColor':'#8A7CFF', 'fontSize':'14px'}}}%%
+flowchart LR
+    H(("🙂 사람")) -->|"하나의 질문"| O["✨ ? ? ?<br/><i>아직 비밀입니다</i>"]
+    O --> A["🤖 에이전트 A"]
+    O --> B["🤖 에이전트 B"]
+    O --> C["🤖 에이전트 C"]
+    A --> R(["하나의 답"])
+    B --> R
+    C --> R
+    R -.->|"다시, 더 나은 질문"| H
+```
+
+<div align="center"><sub>가운데 상자가 무엇인지는, 조금 더 완성되면 열어 보이겠습니다.</sub></div>
+
+<br/>
+
+## 🌱 지금의 단계
+
+|  | 하고 있는 일 | 상태 |
+|:---:|:---|:---:|
+| 🧩 | 여러 AI 에이전트가 하나의 흐름으로 움직이는 구조 학습 | `배우는 중` |
+| 🔬 | 배운 것을 매일 기록하고, 검증하고, 다시 쌓기 | `매일` |
+| 🗺️ | "무엇을 가능하게 하는가"를 먼저 묻는 설계 연습 | `진행 중` |
+
+<br/>
+
+## 🧭 지향점
+
+- 만드는 사람과 쓰는 사람 사이의 **번역가**가 되는 것
+- "어떻게 동작하는가"가 아니라 — **무엇을 가능하게 하는가**를 먼저 묻는 것
+- 완성된 척하지 않고, **과정을 공개하며** 자라는 것
+
+<br/>
+
+---
+
+## 📂 이 저장소 — 파이썬 기초 학습 기록
+
+AI 오케스트레이션 부트캠프 2기, 파이썬 기초 과정입니다.
 수업에서 배운 것을 노트북으로 정리하고, 직접 실행해 검증한 코드만 올립니다.
-
-## 📂 구성
 
 | 폴더/파일 | 내용 |
 |:---|:---|
@@ -14,8 +75,18 @@ AI 오케스트레이션 부트캠프 2기 — 파이썬 기초 학습 저장소
 | `lesson/` | 배운 개념을 애니메이션으로 풀어낸 강의 페이지 |
 | `calc.py` 외 | 모듈 import 실습용 파일들 |
 
-## 🧭 이 저장소의 규칙
+**이 저장소의 규칙**
 
 - "이해했다"로 끝내지 않고, **실행해서 확인한 것**만 정리합니다
 - 가상환경(`.venv`), 캐시(`__pycache__`) 등 재생성 가능한 것은 올리지 않습니다 (`.gitignore` 참고)
 - 하루치 학습이 끝나면 커밋으로 남깁니다 — 과정이 곧 기록입니다
+
+<br/>
+
+<div align="center">
+
+<sub>이야기가 더 궁금하시다면, 저장소들을 천천히 둘러보세요. 과정이 곧 소개입니다.</sub>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer" width="100%" />
+
+</div>
