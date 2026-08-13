@@ -72,7 +72,17 @@ AI 오케스트레이션 부트캠프 2기, 파이썬 기초 과정입니다.
 | `2_모듈_패키지_라이브러리.ipynb` | 모듈 · 패키지 · 라이브러리 개념과 실습 |
 | `3_클래스와객체지향.ipynb` | 클래스와 객체지향 기초 |
 | `My_First_Package/` | 직접 만든 첫 패키지 실습 (`Magic_Calc`) |
+| `basic-python-animation/` | 🎬 자체 제작 파이썬 애니메이션 강의 (아래 ▶ 재생 링크) |
 | `calc.py` 외 | 모듈 import 실습용 파일들 |
+
+### 🎬 애니메이션 바로 재생
+
+| EP | 제목 | 링크 |
+|---|---|---|
+| 01 | 출항 — 파이썬이라는 물길 | [▶ 재생](https://withandwithout0094.github.io/2026_aio2_python-basic/basic-python-animation/EP01-출항.html) |
+| 02 | 기억 창고 — 변수와 자료형 | [▶ 재생](https://withandwithout0094.github.io/2026_aio2_python-basic/basic-python-animation/EP02-기억창고.html) |
+
+<sub>자막 자동재생 · 📒 용어장 · 타이핑 즉시 실행 실험실 · 🎯 퀴즈 — 교재·PDF는 [python-rapids](https://github.com/WithAndWithout0094/python-rapids)</sub>
 
 <br/>
 
