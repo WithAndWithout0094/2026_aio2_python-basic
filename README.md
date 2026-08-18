@@ -81,6 +81,8 @@ AI 오케스트레이션 부트캠프 2기, 파이썬 기초 과정입니다.
 |---|---|---|
 | 01 | 출항 — 파이썬이라는 물길 | [▶ 재생](https://withandwithout0094.github.io/2026_aio2_python-basic/basic-python-animation/EP01-출항.html) |
 | 02 | 기억 창고 — 변수와 자료형 | [▶ 재생](https://withandwithout0094.github.io/2026_aio2_python-basic/basic-python-animation/EP02-기억창고.html) |
+| 03 | 글자의 기술 — 문자열 전용 편 | [▶ 재생](https://withandwithout0094.github.io/2026_aio2_python-basic/basic-python-animation/EP03-글자의기술.html) |
+| 04 | 서가 정리 — 자료구조 4형제 | [▶ 재생](https://withandwithout0094.github.io/2026_aio2_python-basic/basic-python-animation/EP04-서가정리.html) |
 
 <sub>자막 자동재생 · 📒 용어장 · 타이핑 즉시 실행 실험실 · 🎯 퀴즈 — 교재·PDF는 [python-rapids](https://github.com/WithAndWithout0094/python-rapids)</sub>
 

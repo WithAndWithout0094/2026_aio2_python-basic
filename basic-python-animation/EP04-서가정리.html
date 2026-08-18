@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP.04 서가 정리 — 자료구조 4형제 · 파이썬 급류</title>
+<style>
+:root{
+  --bg:#0b0e14; --panel:#121826; --panel2:#0e1420; --line:rgba(255,255,255,.1);
+  --tx:#e8ecf5; --sub:#a7b0c2; --note:#7e8798;
+  --blue:#4da3ff; --mint:#5ee6c0; --amber:#ffc24d; --bad:#ff6b6b; --good:#5ee66b;
+  --vio:#b78aff; --ctx:#7fd0ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro KR","Segoe UI","Malgun Gothic",sans-serif;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% -10%, rgba(77,163,255,.12), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 10% 110%, rgba(94,230,192,.08), transparent 60%),
+    var(--bg);
+  color:var(--tx); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px;
+  -webkit-font-smoothing:antialiased;
+}
+b{color:var(--amber)} code{font-family:Consolas,"D2Coding",monospace; background:rgba(255,255,255,.08); padding:1px 6px; border-radius:6px; font-size:.94em}
+
+.player{width:min(1080px,100%); background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.topbar{display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.02)}
+.epchip{background:linear-gradient(90deg,var(--blue),var(--mint)); color:#08121e; font-weight:900; font-size:12px; padding:4px 10px; border-radius:999px; letter-spacing:.06em}
+.topbar .t{font-weight:800; font-size:15px}
+.gbadge{margin-left:auto; background:rgba(255,255,255,.06); border:1px solid var(--line); color:var(--tx); font-family:inherit; font-size:12px; padding:6px 12px; border-radius:999px; cursor:pointer; transition:background .2s}
+.gbadge~.gbadge{margin-left:0}
+.gbadge:hover{background:rgba(255,255,255,.12)}
+.gbadge .cnt{color:var(--mint); font-weight:800}
+.src{font-size:11px; color:var(--note); text-align:right; line-height:1.5}
+.ymmark{color:var(--mint); font-weight:800}
+.ymseal{display:inline-block; background:linear-gradient(135deg,#2c6fd8,#57c7b8); color:#fff; border-radius:5px; padding:1px 5px; font-size:10px; margin-right:4px}
+
+.stagewrap{position:relative; height:520px; background:var(--panel2)}
+.fscene{position:absolute; inset:0; padding:24px 30px 16px; opacity:0; pointer-events:none; overflow-y:auto; transition:opacity .45s}
+.fscene.act{opacity:1; pointer-events:auto}
+.schead{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+.scno{font-size:10px; letter-spacing:.28em; color:var(--note); border:1px solid var(--line); padding:4px 9px; border-radius:999px}
+.schead h2{font-size:19px}
+.scbody{display:flex; flex-direction:column; gap:12px}
+.center{display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; padding-top:12px}
+.row{display:flex; gap:12px; flex-wrap:wrap}
+.bigline{font-size:clamp(22px,3.4vw,32px); font-weight:900; line-height:1.35}
+.bigline em{color:var(--mint); font-style:normal}
+.subline{color:var(--sub); font-size:14.5px; line-height:1.7}
+.card{background:rgba(255,255,255,.045); border:1px solid var(--line); border-radius:14px; padding:14px 16px; font-size:14px; line-height:1.65}
+.card .note{color:var(--note); font-size:12.5px; line-height:1.6}
+.card.glow{border-color:rgba(94,230,192,.45); box-shadow:0 0 24px rgba(94,230,192,.12)}
+.termtag{display:inline-block; background:rgba(77,163,255,.14); border:1px solid rgba(77,163,255,.4); color:var(--ctx); border-radius:999px; padding:5px 12px; font-size:12.5px; font-weight:700}
+.termtag small{color:var(--sub); font-weight:400}
+.actor{font-size:40px}
+.alabel{font-size:12px; color:var(--sub); margin-top:4px}
+.arrow{color:var(--note); font-weight:700}
+[data-on]{opacity:0; transform:translateY(14px); transition:opacity .5s,transform .5s}
+[data-on].on{opacity:1; transform:none}
+
+/* 창고 그림 (S2) */
+.shelfbox{display:flex; gap:10px; align-items:flex-end; justify-content:center}
+.slot{width:112px; background:rgba(255,255,255,.05); border:1.5px solid var(--line); border-radius:12px; padding:10px; text-align:center}
+.slot .tagname{display:inline-block; background:rgba(255,194,77,.15); border:1px solid rgba(255,194,77,.5); color:var(--amber); font-size:11px; font-weight:800; border-radius:6px; padding:2px 8px; margin-bottom:7px; font-family:Consolas,monospace}
+.slot .goods{font-size:13px; font-family:Consolas,monospace; background:#0a0f18; border-radius:8px; padding:8px 6px}
+
+.codecard{background:#0a0f18; border:1px solid var(--line); border-radius:12px; padding:12px 16px; font-family:Consolas,"D2Coding",monospace; font-size:13.5px; line-height:1.9; overflow-x:auto; white-space:pre}
+.codecard .cm{color:#6a7385}
+.codecard .st{color:#8fd0a0}
+.codecard .res{color:var(--note)}
+
+/* ===== 라이브 실험실 ===== */
+.lab{border:1px solid rgba(77,163,255,.35); border-radius:14px; overflow:hidden; background:#0a0f18}
+.lab-head{display:flex; align-items:center; gap:10px; padding:8px 14px; background:rgba(77,163,255,.1); font-size:12.5px; font-weight:800; color:var(--ctx)}
+.lab-head .stat{margin-left:auto; font-weight:400; font-size:11.5px; color:var(--note)}
+.lab-head .stat.ok{color:var(--mint)}
+.lab-head button{background:rgba(255,255,255,.08); border:1px solid var(--line); color:var(--tx); font-family:inherit; font-size:11.5px; padding:4px 10px; border-radius:8px; cursor:pointer}
+.lab-head button:hover{background:rgba(255,255,255,.15)}
+.lab-body{display:grid; grid-template-columns:1.2fr 1fr; gap:0}
+.lab textarea{
+  width:100%; min-height:104px; resize:vertical; border:none; outline:none;
+  background:#0a0f18; color:#dfe7f5; font-family:Consolas,"D2Coding",monospace; font-size:13.5px; line-height:1.8; padding:12px 14px;
+  border-right:1px solid var(--line); caret-color:var(--mint);
+}
+.lab textarea::selection{background:rgba(255,194,77,.5); color:#fff}
+.lab-outs{display:flex; flex-direction:column}
+.lab-out{flex:1; padding:9px 13px; font-family:Consolas,monospace; font-size:12.5px; line-height:1.7; white-space:pre-wrap}
+.lab-out .lbl{display:block; font-family:inherit; font-size:10.5px; letter-spacing:.14em; color:var(--note); margin-bottom:4px}
+.lab-out.before{border-bottom:1px dashed var(--line); color:var(--sub)}
+.lab-out.after{color:var(--mint)}
+.lab-out.after.diff{background:rgba(255,194,77,.06)}
+.lab-out.after.diff .lbl{color:var(--amber)}
+.lab-out.after .err{color:var(--bad)}
+.lab-foot{padding:6px 14px 9px; font-size:11.5px; color:var(--note); border-top:1px solid var(--line)}
+.lab-foot .same{color:var(--good)} .lab-foot .changed{color:var(--amber)}
+/* input( ) 가상 답변 입력줄 */
+.lab-stdin{display:flex; align-items:center; gap:9px; padding:8px 14px; border-top:1px solid var(--line); background:rgba(94,230,192,.05); font-size:12px; color:var(--sub)}
+.lab-stdin input{flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(94,230,192,.35); border-radius:8px; color:var(--mint); font-family:Consolas,monospace; font-size:12.5px; padding:6px 10px; outline:none}
+
+.vrow{display:flex; gap:8px; flex-wrap:wrap; padding:8px 14px; border-top:1px solid var(--line); background:rgba(255,255,255,.02)}
+.vchip{position:relative; background:rgba(183,138,255,.12); border:1px solid rgba(183,138,255,.45); color:var(--vio); font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; cursor:pointer; user-select:none}
+.vchip::after{content:""; position:absolute; left:0; right:0; bottom:100%; height:14px}
+.vpop{position:absolute; bottom:calc(100% + 8px); left:0; min-width:240px; background:#161c2c; border:1px solid rgba(183,138,255,.5); border-radius:12px; padding:10px; display:none; z-index:40; box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.vchip:hover .vpop, .vchip.pin .vpop{display:block}
+.vchip.pin{background:rgba(183,138,255,.25)}
+.vpop .vt{font-size:11px; color:var(--note); margin-bottom:7px}
+.vpop button{display:block; width:100%; text-align:left; background:rgba(255,255,255,.05); border:1px solid var(--line); color:#dfe7f5; font-family:Consolas,monospace; font-size:12.5px; padding:6px 10px; border-radius:8px; cursor:pointer; margin-bottom:5px}
+.vpop button:hover{background:rgba(183,138,255,.18); border-color:rgba(183,138,255,.5)}
+.vpop .vn{font-size:10.5px; color:var(--note)}
+
+.trap{border:1px solid rgba(255,107,107,.4); border-radius:14px; padding:13px 16px; background:rgba(255,107,107,.05); font-size:13.5px; line-height:1.7}
+.trap b{color:var(--bad)}
+
+.gpanel{position:absolute; inset:0; background:rgba(8,11,18,.96); z-index:30; padding:26px 30px; display:none; overflow-y:auto}
+.gpanel.open{display:block}
+.gclose{position:absolute; top:14px; right:16px; background:rgba(255,255,255,.08); border:1px solid var(--line); color:var(--tx); width:32px; height:32px; border-radius:50%; cursor:pointer}
+.gpanel h3{margin-bottom:4px}
+.gsub{color:var(--note); font-size:12.5px; margin-bottom:16px}
+.ggrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px}
+.gitem{background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:12px; padding:11px 13px; font-size:13px; cursor:pointer; transition:border-color .2s}
+.gitem:hover{border-color:rgba(94,230,192,.5)}
+.gitem.locked{opacity:.28; pointer-events:none}
+.gitem .gn{font-weight:800} .gitem .ge{color:var(--ctx); font-size:11.5px} .gitem .gd{color:var(--sub); font-size:12px; margin-top:4px; line-height:1.55}
+
+.poster{position:absolute; inset:0; z-index:20; background:
+  radial-gradient(ellipse 70% 55% at 50% 30%, rgba(77,163,255,.16), transparent 65%), rgba(8,11,18,.97);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:24px}
+.poster .logo{font-size:52px}
+.poster .ep{letter-spacing:.4em; font-size:12px; color:var(--mint); font-weight:800}
+.poster h2{font-size:30px}
+.poster .desc{color:var(--sub); font-size:14px; max-width:540px; line-height:1.75}
+.bigplay{margin-top:8px; font-family:inherit; font-size:17px; font-weight:800; color:#08121e; background:linear-gradient(90deg,var(--blue),var(--mint)); border:none; padding:14px 42px; border-radius:999px; cursor:pointer; box-shadow:0 0 34px rgba(94,230,192,.35); transition:transform .2s}
+.bigplay:hover{transform:scale(1.05)}
+.poster .alt{font-size:12px; color:var(--note)}
+.poster .cr{font-size:12px; color:var(--sub); margin-top:8px; line-height:1.7}
+
+.subwrap{padding:10px 18px 4px; background:var(--panel)}
+.subbar{display:flex; gap:10px; align-items:flex-start; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:12px; padding:10px 16px; min-height:58px}
+.subbar .mic{font-size:16px}
+.subbar p{font-size:14.5px; line-height:1.7; color:var(--tx)}
+.tchip{display:inline-block; background:rgba(94,230,192,.14); border:1px solid rgba(94,230,192,.5); color:var(--mint); border-radius:999px; padding:1px 9px; font-size:.92em; font-weight:700}
+
+.deck{display:flex; align-items:center; gap:10px; padding:10px 18px 14px; background:var(--panel)}
+.nbtn,.pbtn{background:rgba(255,255,255,.07); border:1px solid var(--line); color:var(--tx); width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:13px; transition:background .2s}
+.pbtn{width:46px; height:46px; font-size:16px; background:linear-gradient(135deg,rgba(77,163,255,.25),rgba(94,230,192,.25))}
+.nbtn:hover,.pbtn:hover{background:rgba(255,255,255,.16)}
+.progresswrap{flex:1; display:flex; flex-direction:column; gap:5px}
+.progress{position:relative; height:8px; background:rgba(255,255,255,.1); border-radius:999px; cursor:pointer; overflow:visible}
+.progress:hover{height:11px}
+.progress .fill{position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--blue),var(--mint)); transition:none}
+.progress .knob{position:absolute; top:50%; width:14px; height:14px; border-radius:50%; background:#fff; transform:translate(-50%,-50%) scale(0); transition:transform .15s; box-shadow:0 0 10px rgba(255,255,255,.6)}
+.progress:hover .knob{transform:translate(-50%,-50%) scale(1)}
+.progress .ticks{position:absolute; inset:0}
+.progress .tick{position:absolute; top:0; bottom:0; width:2px; background:rgba(8,11,18,.55)}
+.meta{display:flex; justify-content:space-between; font-size:11.5px; color:var(--note)}
+.meta .scname{color:var(--sub)}
+
+/* 퀴즈 */
+.qpanel{position:absolute; inset:0; background:rgba(8,11,18,.97); z-index:31; padding:24px 30px; display:none; overflow-y:auto}
+.qpanel.open{display:block}
+.qhead{display:flex; align-items:center; gap:12px; margin-bottom:14px}
+.qhead h3{font-size:18px}
+.qscore{background:rgba(94,230,192,.14); border:1px solid rgba(94,230,192,.5); color:var(--mint); font-weight:800; font-size:13px; padding:5px 14px; border-radius:999px}
+.qcard{background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:12px}
+.qcard .qq{font-size:15.5px; font-weight:800; line-height:1.6; margin-bottom:12px}
+.qcard .qq .qtag{display:inline-block; font-size:10.5px; letter-spacing:.14em; color:var(--note); border:1px solid var(--line); border-radius:999px; padding:2px 9px; margin-right:8px; vertical-align:2px}
+.qchoices{display:flex; flex-direction:column; gap:8px}
+.qchoice{text-align:left; background:rgba(255,255,255,.05); border:1px solid var(--line); color:var(--tx); font-family:inherit; font-size:14px; line-height:1.55; padding:10px 14px; border-radius:11px; cursor:pointer; transition:border-color .15s, background .15s}
+.qchoice:hover{border-color:rgba(77,163,255,.6); background:rgba(77,163,255,.08)}
+.qchoice.correct{border-color:rgba(94,230,107,.7); background:rgba(94,230,107,.12)}
+.qchoice.wrong{border-color:rgba(255,107,107,.7); background:rgba(255,107,107,.1)}
+.qchoice:disabled{cursor:default; opacity:.9}
+.qfeed{margin-top:12px; font-size:13.5px; line-height:1.7; border-radius:11px; padding:11px 14px; display:none}
+.qfeed.ok{display:block; background:rgba(94,230,107,.08); border:1px solid rgba(94,230,107,.4)}
+.qfeed.no{display:block; background:rgba(255,107,107,.07); border:1px solid rgba(255,107,107,.4)}
+.qnext{margin-top:12px; font-family:inherit; font-size:14px; font-weight:800; color:#08121e; background:linear-gradient(90deg,var(--blue),var(--mint)); border:none; padding:10px 26px; border-radius:999px; cursor:pointer; display:none}
+.qnext.show{display:inline-block}
+.qlock{margin-top:16px; position:relative}
+.qlock .lockbar{display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.04); border:1px dashed var(--line); border-radius:12px; padding:12px 16px; font-size:13.5px; color:var(--sub); cursor:default}
+.qlock .lockbar .ic{font-size:18px}
+.qlock .lockpop{position:absolute; bottom:calc(100% + 8px); left:16px; background:#161c2c; border:1px solid rgba(255,194,77,.5); border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--sub); line-height:1.6; display:none; z-index:5; max-width:340px; box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.qlock .lockbar:hover + .lockpop, .qlock .lockpop:hover{display:block}
+.qlist{display:none; flex-direction:column; gap:8px; margin-top:10px}
+.qlist.open{display:flex}
+.qitem{position:relative; background:rgba(255,255,255,.045); border:1px solid var(--line); border-radius:11px; padding:10px 14px; font-size:13px; cursor:default}
+.qitem .qi-n{color:var(--mint); font-weight:800; margin-right:6px}
+.qitem .qi-pop{position:absolute; bottom:calc(100% + 6px); left:12px; right:12px; background:#161c2c; border:1px solid rgba(94,230,192,.5); border-radius:12px; padding:11px 14px; font-size:12.5px; line-height:1.65; display:none; z-index:6; box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.qitem:hover .qi-pop{display:block}
+.qitem .qi-pop .ans{color:var(--mint); font-weight:800}
+.qclosebtn{position:absolute; top:14px; right:16px; background:rgba(255,255,255,.08); border:1px solid var(--line); color:var(--tx); width:32px; height:32px; border-radius:50%; cursor:pointer}
+
+/* 제미나이 */
+.chatpanel{position:absolute; right:0; top:0; bottom:0; width:min(400px,92%); background:#0d1220; border-left:1px solid var(--line); z-index:32; display:none; flex-direction:column; box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.chatpanel.open{display:flex}
+.ch-head{display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid var(--line); font-size:13.5px; font-weight:800}
+.ch-head .x{margin-left:auto; background:rgba(255,255,255,.08); border:1px solid var(--line); color:var(--tx); width:28px; height:28px; border-radius:50%; cursor:pointer}
+.ch-msgs{flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px}
+.msg{max-width:88%; padding:9px 13px; border-radius:13px; font-size:13px; line-height:1.65; white-space:pre-wrap}
+.msg.bot{background:rgba(255,255,255,.06); border:1px solid var(--line); align-self:flex-start}
+.msg.me{background:rgba(77,163,255,.16); border:1px solid rgba(77,163,255,.4); align-self:flex-end}
+.ch-keys{padding:12px 14px; border-top:1px solid var(--line); background:rgba(255,194,77,.04)}
+.ch-keys .kt{font-size:12.5px; font-weight:800; color:var(--amber); margin-bottom:8px}
+.ch-keys .krow{display:flex; gap:8px; margin-bottom:8px}
+.ch-keys input{flex:1; background:rgba(255,255,255,.07); border:1px solid var(--line); border-radius:8px; color:var(--tx); font-family:inherit; font-size:12.5px; padding:8px 10px; outline:none}
+.ch-keys button{background:linear-gradient(90deg,var(--blue),var(--mint)); border:none; color:#08121e; font-weight:800; font-family:inherit; font-size:12.5px; padding:8px 14px; border-radius:8px; cursor:pointer}
+.ch-keys .kn{font-size:11.5px; color:var(--note); line-height:1.7}
+.ch-keys .kn a{color:var(--ctx)}
+.ch-input{display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--line)}
+.ch-input input{flex:1; background:rgba(255,255,255,.07); border:1px solid var(--line); border-radius:999px; color:var(--tx); font-family:inherit; font-size:13px; padding:9px 16px; outline:none}
+.ch-input button{background:linear-gradient(90deg,var(--blue),var(--mint)); border:none; color:#08121e; font-weight:800; font-family:inherit; font-size:13px; padding:9px 18px; border-radius:999px; cursor:pointer}
+.ch-foot{padding:0 14px 12px; font-size:10.5px; color:var(--note); line-height:1.6}
+.ch-foot button{background:none; border:none; color:var(--ctx); font-size:10.5px; cursor:pointer; text-decoration:underline; font-family:inherit}
+
+@media (max-width:760px){
+  .stagewrap{height:560px}
+  .lab-body{grid-template-columns:1fr}
+  .lab textarea{border-right:none; border-bottom:1px solid var(--line)}
+  .src{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="player" id="player">
+  <div class="topbar">
+    <span class="epchip">EP.04</span>
+    <span class="t">서가 정리 — 자료구조 4형제</span>
+    <button class="gbadge" id="gbadge">📒 용어장 <span class="cnt" id="gcnt">0 / 15</span></button>
+    <button class="gbadge" id="qbadge">🎯 퀴즈 <span class="cnt" id="qcnt">0 / 10</span></button>
+    <button class="gbadge" id="chopen">🤖 질문하기</button>
+    <div class="src">🌊 파이썬 급류 · 만든이 <b style="color:var(--tx)">신영석</b> · <span class="ymseal">泳</span><span class="ymmark">Young Motion</span></div>
+  </div>
+
+  <div class="stagewrap" id="stagewrap">
+
+    <!-- S1 프롤로그 -->
+    <section class="fscene" id="fs1">
+      <div class="schead"><span class="scno">SCENE 1</span><h2>프롤로그 — 기증 도서가 쏟아진 날</h2></div>
+      <div class="scbody"><div class="center">
+        <div class="bigline" data-on="0">문 앞에 상자가 <em>산더미</em>…<br>기증 도서가 쏟아졌습니다!</div>
+        <div class="row" data-on="1" style="justify-content:center; align-items:center">
+          <div style="text-align:center"><div class="actor">🧑‍🚀</div><div class="alabel">라이카</div></div>
+          <div class="card" style="max-width:320px">💬 "정착 기념으로 책을 좀 기증하려고요. …좀 많아요."</div>
+        </div>
+        <div class="card" data-on="2" style="max-width:490px; border-color:rgba(255,107,107,.4)">😱 지난 편의 도서 카드는 <b style="color:var(--tx)">변수 4개로 책 한 권</b>.<div class="note" style="margin-top:5px">30권이면 이름표가 <b style="color:var(--bad)">120개</b>?! title1, title2, title3… 이건 창고가 아니라 미로다.<br>오늘의 미션: 책이 아무리 늘어도 끄떡없는 <b style="color:var(--tx)">장서 데이터베이스</b>를 지을 것.</div></div>
+        <div class="row" data-on="3" style="justify-content:center">
+          <span class="termtag">🎯 서가 한 줄 = 리스트</span>
+          <span class="termtag">🎯 밀봉 상자 = 튜플</span>
+          <span class="termtag">🎯 도서 카드 = 딕셔너리</span>
+          <span class="termtag">🎯 회수함 = 셋</span>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- S2 자료구조 4형제 -->
+    <section class="fscene" id="fs2">
+      <div class="schead"><span class="scno">SCENE 2</span><h2>자료구조 4형제 — 값을 묶는 큰 가구</h2></div>
+      <div class="scbody"><div class="center" style="gap:12px">
+        <div class="subline" data-on="0">변수는 물건 <b>하나</b>를 넣는 창고 칸 — 이제 값 여러 개를 <b>한 이름표 아래 묶는</b> 큰 가구가 필요하다 = <span class="termtag" style="font-size:11.5px">자료구조 <small>data structure</small></span></div>
+        <div class="row" data-on="1" style="justify-content:center">
+          <span class="card" style="font-size:13px">📚 서가 한 줄 — <b>리스트</b> <span class="termtag" style="font-size:11px">list</span><br><span class="note"><code>[값, 값]</code> 대괄호 — 순서 있음, 자유롭게 수정</span></span>
+          <span class="card" style="font-size:13px">📦 밀봉 상자 — <b>튜플</b> <span class="termtag" style="font-size:11px">tuple</span><br><span class="note"><code>(값, 값)</code> 소괄호 — 순서 있음, <b style="color:var(--amber)">수정 불가</b></span></span>
+        </div>
+        <div class="row" data-on="1" style="justify-content:center">
+          <span class="card" style="font-size:13px">🗂 도서 카드 — <b>딕셔너리</b> <span class="termtag" style="font-size:11px">dict</span><br><span class="note"><code>{키: 값}</code> 중괄호 — 이름표(키)로 값을 꺼냄</span></span>
+          <span class="card" style="font-size:13px">🧺 중복 없는 회수함 — <b>셋</b> <span class="termtag" style="font-size:11px">set</span><br><span class="note"><code>{값, 값}</code> 중괄호 — 중복 자동 제거, 순서 없음</span></span>
+        </div>
+        <div class="card" data-on="2" style="max-width:490px">💡 이번 편은 <b>속성 과정에서 통째로 빠지기 쉬운 편</b>이다.<div class="note" style="margin-top:4px">하지만 실제 코드의 데이터는 거의 전부 이 4형제 안에 담긴다 — 급류를 탈 가치 충분! (이 밖에도 더 있다)</div></div>
+      </div></div>
+    </section>
+
+    <!-- S3 리스트 + LAB1 -->
+    <section class="fscene" id="fs3">
+      <div class="schead"><span class="scno">SCENE 3</span><h2>리스트 — 책이 꽂히는 서가 한 줄</h2></div>
+      <div class="scbody">
+        <div class="shelfbox" data-on="0">
+          <div class="slot"><span class="tagname">0번 칸</span><div class="goods">"파이썬 입문"</div></div>
+          <div class="slot"><span class="tagname">1번 칸</span><div class="goods">"은하 항해술"</div></div>
+          <div class="slot"><span class="tagname">2번 칸</span><div class="goods">"블랙홀 요리책"</div></div>
+        </div>
+        <div class="row" data-on="0" style="justify-content:center">
+          <span class="termtag">인덱스 <small>index</small> = 칸 번호 — 0부터!</span>
+          <span class="termtag">-1 = 맨 끝 칸</span>
+          <span class="termtag">len( ) = 서가의 줄자</span>
+        </div>
+        <div class="lab" data-on="1" data-lab="lab1">
+          <div class="lab-head">🧪 실험실 — 서가 한 줄을 만들어 칸을 열어 보세요 <span class="stat">엔진 준비 중…</span><button class="rst">⟲ 원래대로</button></div>
+          <div class="lab-body">
+            <textarea spellcheck="false">shelf = ["파이썬 입문", "은하 항해술", "블랙홀 요리책"]
+
+print(shelf)       # 서가 통째로
+print(shelf[0])    # 칸 번호는 0부터!
+print(shelf[-1])   # -1은 맨 끝 칸
+print(len(shelf))  # 서가의 줄자</textarea>
+            <div class="lab-outs">
+              <div class="lab-out before"><span class="lbl">변경 전 (원본 결과)</span><span class="txt"></span></div>
+              <div class="lab-out after"><span class="lbl">내 결과 (실시간)</span><span class="txt"></span></div>
+            </div>
+          </div>
+          <div class="vrow">
+            <span class="vchip">4행 칸 번호 바꿔보기 ▾
+              <span class="vpop"><span class="vt">print(shelf[0])의 칸 번호를 바꿔 보세요 (클릭하면 적용 · 칩 클릭 시 목록 고정)</span>
+                <button data-find=".*" data-line="3" data-put="print(shelf[1])    # 1번 칸은?">shelf[1] <span class="vn">— 두 번째 칸</span></button>
+                <button data-find=".*" data-line="3" data-put="print(shelf[2])    # 2번 칸은?">shelf[2] <span class="vn">— 세 번째 칸</span></button>
+                <button data-find=".*" data-line="3" data-put="print(shelf[3])    # ⚠️ 없는 칸을 열면?">shelf[3] <span class="vn">— ⚠️ IndexError 관찰</span></button>
+                <button data-find=".*" data-line="3" data-put="print(shelf[0])    # 칸 번호는 0부터!">shelf[0] <span class="vn">— ⟲ 원래대로</span></button>
+              </span>
+            </span>
+          </div>
+          <div class="lab-foot"></div>
+        </div>
+        <div class="subline" data-on="2" style="text-align:center">대괄호 속 <b>칸 번호</b>를 바꿔 보세요 — 리스트를 통째로 print 하면 작은따옴표 <code>' '</code>로 감싸 보여요 (정상!).</div>
+        <div class="subline" data-on="3" style="text-align:center">칸 번호를 <code>3</code>으로 바꾸면? 3권짜리 서가의 칸은 0·1·2번 — 오류 안내문 관찰도 훌륭한 실험!</div>
+      </div>
+    </section>
+
+    <!-- S4 서가 정리 기술 + LAB2 -->
+    <section class="fscene" id="fs4">
+      <div class="schead"><span class="scno">SCENE 4</span><h2>서가 정리 기술 — 꽂고, 빼고, 바꾸고, 구간으로</h2></div>
+      <div class="scbody">
+        <div class="row" data-on="0" style="justify-content:center">
+          <span class="card" style="font-size:13px">📥 <code>append(값)</code><br><span class="note">맨 끝 칸에 새 책 꽂기</span></span>
+          <span class="card" style="font-size:13px">📤 <code>remove(값)</code><br><span class="note">값을 찾아서 빼기</span></span>
+          <span class="card" style="font-size:13px">🔄 <code>서가[번호] = 새 값</code><br><span class="note">그 칸의 책 교체</span></span>
+          <span class="card" style="font-size:13px">✂️ 슬라이스 <code>[시작:끝]</code><br><span class="note">구간 통째로 — <b>끝 번호 직전까지</b></span></span>
+        </div>
+        <div class="lab" data-on="1" data-lab="lab2">
+          <div class="lab-head">🧪 실험실 — 기증 도서를 정리하고, 구간을 꺼내 보세요 <span class="stat">엔진 준비 중…</span><button class="rst">⟲ 원래대로</button></div>
+          <div class="lab-body">
+            <textarea spellcheck="false">shelf = ["파이썬 입문", "은하 항해술", "블랙홀 요리책"]
+
+shelf.append("화성 정원 가꾸기")   # 맨 끝 칸에 새 책 꽂기
+shelf.remove("은하 항해술")        # 값을 찾아서 빼기 (라이카가 빌려 갔다)
+shelf[0] = "파이썬 급류"           # 0번 칸의 책 교체
+print(shelf)
+print(shelf[0:2])   # 슬라이스 — 0번부터 2번 직전까지</textarea>
+            <div class="lab-outs">
+              <div class="lab-out before"><span class="lbl">변경 전 (원본 결과)</span><span class="txt"></span></div>
+              <div class="lab-out after"><span class="lbl">내 결과 (실시간)</span><span class="txt"></span></div>
+            </div>
+          </div>
+          <div class="vrow">
+            <span class="vchip">7행 구간 바꿔보기 ▾
+              <span class="vpop"><span class="vt">슬라이스 구간을 바꿔 보세요 (클릭하면 적용 · 칩 클릭 시 목록 고정)</span>
+                <button data-find=".*" data-line="6" data-put="print(shelf[1:3])   # 1번부터 3번 직전까지">shelf[1:3] <span class="vn">— 1번부터 3번 직전까지</span></button>
+                <button data-find=".*" data-line="6" data-put="print(shelf[:2])    # 처음부터 2번 직전까지">shelf[:2] <span class="vn">— 처음부터</span></button>
+                <button data-find=".*" data-line="6" data-put="print(shelf[1:])    # 1번부터 끝까지">shelf[1:] <span class="vn">— 끝까지</span></button>
+                <button data-find=".*" data-line="6" data-put="print(shelf[0])     # 콜론이 없으면? — 책 한 권 (문자열)">shelf[0] <span class="vn">— 콜론이 없으면?</span></button>
+                <button data-find=".*" data-line="6" data-put="print(shelf[0:1])   # 콜론이 있으면? — 서가 조각 (리스트)">shelf[0:1] <span class="vn">— 콜론이 있으면?</span></button>
+                <button data-find=".*" data-line="6" data-put="print(shelf[0:2])   # 슬라이스 — 0번부터 2번 직전까지">shelf[0:2] <span class="vn">— ⟲ 원래대로</span></button>
+              </span>
+            </span>
+          </div>
+          <div class="lab-foot"></div>
+        </div>
+        <div class="subline" data-on="2" style="text-align:center">끝 번호 <b>직전까지</b> — EP.03 문자열 슬라이스와 완전히 같은 규칙입니다. 바꿔보기 칩으로 구간 실험!</div>
+        <div class="card" data-on="3" style="max-width:530px; margin:0 auto">🔬 <b>미세한 차이</b> — <code>shelf[0]</code>은 책 <b>한 권</b>(문자열), <code>shelf[0:1]</code>은 책 한 권이 꽂힌 <b>서가 조각</b>(리스트)<div class="note" style="margin-top:4px">대괄호 안 콜론(:)의 유무가 결과의 <b>종류</b>를 가른다!</div></div>
+      </div>
+    </section>
+
+    <!-- S5 in / index + LAB3 -->
+    <section class="fscene" id="fs5">
+      <div class="schead"><span class="scno">SCENE 5</span><h2>in — "그 책 있나요?"를 한 단어로</h2></div>
+      <div class="scbody">
+        <div class="row" data-on="0" style="justify-content:center; align-items:center">
+          <span class="actor">🔍</span>
+          <span class="card" style="font-size:13px"><code>"은하 항해술" in shelf</code> → True<div class="note" style="margin-top:4px"><b>있냐/없냐</b>만 답한다 — "없는 게 맞나요?"는 <code>not in</code></div></span>
+          <span class="card" style="font-size:13px"><code>shelf.index("은하 항해술")</code> → 1<div class="note" style="margin-top:4px"><b>어느 칸인지</b> 번호로 답한다 — 질문이 다르면 도구도 다르다</div></span>
+        </div>
+        <div class="lab" data-on="1" data-lab="lab3">
+          <div class="lab-head">🧪 실험실 — 서가에 물어보세요: 있나요? 몇 번째 칸인가요? <span class="stat">엔진 준비 중…</span><button class="rst">⟲ 원래대로</button></div>
+          <div class="lab-body">
+            <textarea spellcheck="false">shelf = ["파이썬 입문", "은하 항해술", "블랙홀 요리책"]
+
+print("은하 항해술" in shelf)       # 있나요?
+print("화성 요리책" in shelf)       # 없는 책이면?
+print("화성 요리책" not in shelf)   # "없는 게 맞나요?"
+print(shelf.index("은하 항해술"))   # 몇 번째 칸?</textarea>
+            <div class="lab-outs">
+              <div class="lab-out before"><span class="lbl">변경 전 (원본 결과)</span><span class="txt"></span></div>
+              <div class="lab-out after"><span class="lbl">내 결과 (실시간)</span><span class="txt"></span></div>
+            </div>
+          </div>
+          <div class="vrow">
+            <span class="vchip">6행 질문 바꿔보기 ▾
+              <span class="vpop"><span class="vt">index( )에 다른 책을 물어보세요 (클릭하면 적용 · 칩 클릭 시 목록 고정)</span>
+                <button data-find=".*" data-line="5" data-put="print(shelf.index(&quot;블랙홀 요리책&quot;))   # 다른 책의 칸 번호">index("블랙홀 요리책") <span class="vn">— 다른 책의 칸</span></button>
+                <button data-find=".*" data-line="5" data-put="print(shelf.index(&quot;화성 요리책&quot;))   # ⚠️ 없는 책을 물으면?">index("화성 요리책") <span class="vn">— ⚠️ ValueError 관찰</span></button>
+                <button data-find=".*" data-line="5" data-put="print(shelf.index(&quot;은하 항해술&quot;))   # 몇 번째 칸?">index("은하 항해술") <span class="vn">— ⟲ 원래대로</span></button>
+              </span>
+            </span>
+          </div>
+          <div class="lab-foot"></div>
+        </div>
+        <div class="card" data-on="2" style="max-width:530px; margin:0 auto; border-color:rgba(255,194,77,.4)">⚠️ <code>index( )</code>에 <b>없는 값</b>을 물으면 <b>ValueError</b>가 난다.<div class="note" style="margin-top:4px">그래서 실전에서는 <code>in</code>으로 먼저 확인하고 <code>index( )</code>를 쓰는 순서가 안전 — 이번 미션에서 그대로 쓴다.</div></div>
+      </div>
+    </section>
+
+    <!-- S6 튜플 · 가변 vs 불변 + LAB4 -->
+    <section class="fscene" id="fs6">
+      <div class="schead"><span class="scno">SCENE 6</span><h2>튜플 — 밀봉 상자, 그리고 가변 vs 불변</h2></div>
+      <div class="scbody">
+        <div class="row" data-on="0" style="justify-content:center">
+          <div class="codecard" style="font-size:12.5px">shelf = ["파이썬 입문", "은하 항해술"]
+shelf[0] = "파이썬 급류"
+print(shelf)
+<span class="res"># ['파이썬 급류', '은하 항해술']  ← 교체 성공!</span></div>
+          <div class="codecard" style="font-size:12.5px">shelf = ("파이썬 입문", "은하 항해술")
+shelf[0] = "파이썬 급류"
+<span class="res"># ⚠️ TypeError: 'tuple' object
+#    does not support item assignment</span></div>
+        </div>
+        <div class="subline" data-on="0" style="text-align:center">다른 곳은 <b>괄호 모양뿐</b>인데, 교체가 오류가 됩니다 — 미세한 차이 관찰!</div>
+        <div class="lab" data-on="1" data-lab="lab4">
+          <div class="lab-head">🧪 실험실 — 밀봉 상자를 뜯어 보세요 (오류도 훌륭한 실험!) <span class="stat">엔진 준비 중…</span><button class="rst">⟲ 원래대로</button></div>
+          <div class="lab-body">
+            <textarea spellcheck="false">shelf = ("파이썬 입문", "은하 항해술")   # 소괄호 = 튜플 (밀봉 상자)
+print(shelf[0])        # 읽기는 자유
+print(len(shelf))      # len( )도 그대로 통한다
+shelf[0] = "파이썬 급류"   # ⚠️ 밀봉 상자를 뜯으면?</textarea>
+            <div class="lab-outs">
+              <div class="lab-out before"><span class="lbl">변경 전 (원본 결과)</span><span class="txt"></span></div>
+              <div class="lab-out after"><span class="lbl">내 결과 (실시간)</span><span class="txt"></span></div>
+            </div>
+          </div>
+          <div class="vrow">
+            <span class="vchip">1행 괄호 바꿔보기 ▾
+              <span class="vpop"><span class="vt">괄호 모양만 바꾸면 어떻게 될까요? (클릭하면 적용 · 칩 클릭 시 목록 고정)</span>
+                <button data-find=".*" data-line="0" data-put="shelf = [&quot;파이썬 입문&quot;, &quot;은하 항해술&quot;]   # 대괄호 = 리스트 (서가)">[ ] 대괄호로 <span class="vn">— 리스트면 교체 성공!</span></button>
+                <button data-find=".*" data-line="0" data-put="shelf = (&quot;파이썬 입문&quot;, &quot;은하 항해술&quot;)   # 소괄호 = 튜플 (밀봉 상자)">( ) 소괄호로 <span class="vn">— ⟲ 튜플 오류 다시 보기</span></button>
+              </span>
+            </span>
+            <span class="vchip">4행 바꿔보기 ▾
+              <span class="vpop"><span class="vt">밀봉 상자를 뜯지 않으면 평화롭습니다 (클릭하면 적용)</span>
+                <button data-find=".*" data-line="3" data-put="print(shelf)           # 뜯지 않고 읽기만 하면 평화롭다">print(shelf) <span class="vn">— 읽기만 하기</span></button>
+                <button data-find=".*" data-line="3" data-put="shelf[0] = &quot;파이썬 급류&quot;   # ⚠️ 밀봉 상자를 뜯으면?">shelf[0] = … <span class="vn">— ⟲ 오류 다시 보기</span></button>
+              </span>
+            </span>
+          </div>
+          <div class="lab-foot"></div>
+        </div>
+        <div class="card" data-on="2" style="max-width:530px; margin:0 auto">🔒 고칠 수 있으면 <b>가변</b> <span class="termtag" style="font-size:11px">mutable</span> · 못 고치면 <b>불변</b> <span class="termtag" style="font-size:11px">immutable</span><div class="note" style="margin-top:4px">가변 = <b>리스트 · 딕셔너리 · 셋</b> (늘고 줄고 바뀌는 데이터) / 불변 = <b>튜플 · 문자열(str)</b> (개관일, 좌표처럼 바뀌면 안 되는 기록)</div></div>
+        <div class="card" data-on="3" style="max-width:530px; margin:0 auto">💡 EP.03의 "문자열은 글자 하나만 바꿀 수 없다" — 문자열도 <b>불변</b>이기 때문<div class="note" style="margin-top:4px">튜플의 TypeError와 문자열의 TypeError는 같은 이유에서 나온다. 오류문까지 쌍둥이! (함정 카드에서 다시 확인)</div></div>
+      </div>
+    </section>
+
+    <!-- S7 딕셔너리 + LAB5 -->
+    <section class="fscene" id="fs7">
+      <div class="schead"><span class="scno">SCENE 7</span><h2>딕셔너리 — 진짜 도서 카드</h2></div>
+      <div class="scbody">
+        <div class="row" data-on="0" style="justify-content:center; align-items:center">
+          <span class="actor">🗂</span>
+          <span class="card">지난 편엔 변수 4개가 <b>따로</b> 놀았다 — 이제 <b>카드 한 장</b>으로 묶는다<div class="note" style="margin-top:4px"><code>{키: 값}</code> — 키는 항목의 이름표, 값은 내용</div></span>
+          <span class="termtag">리스트 = "몇 번째 칸?" · 딕셔너리 = "무슨 항목?"</span>
+        </div>
+        <div class="lab" data-on="1" data-lab="lab5">
+          <div class="lab-head">🧪 실험실 — 카드 한 장에 책 정보를 전부 담아 보세요 <span class="stat">엔진 준비 중…</span><button class="rst">⟲ 원래대로</button></div>
+          <div class="lab-body">
+            <textarea spellcheck="false">book = {"title": "파이썬 입문", "author": "김우주", "year": 2021, "can_borrow": True}
+
+print(book["title"])    # 칸 번호가 아니라 키(이름표)로!
+book["can_borrow"] = False    # 있는 키 = 값 수정
+book["location"] = "A서가 3번 칸"   # 없는 키 = 새 항목 추가
+print(book)
+print("title" in book)   # 딕셔너리의 in은 키만 본다!</textarea>
+            <div class="lab-outs">
+              <div class="lab-out before"><span class="lbl">변경 전 (원본 결과)</span><span class="txt"></span></div>
+              <div class="lab-out after"><span class="lbl">내 결과 (실시간)</span><span class="txt"></span></div>
+            </div>
+          </div>
+          <div class="vrow">
+            <span class="vchip">7행 질문 바꿔보기 ▾
+              <span class="vpop"><span class="vt">딕셔너리에 무엇을 물어볼까요? (클릭하면 적용 · 칩 클릭 시 목록 고정)</span>
+                <button data-find=".*" data-line="6" data-put="print(&quot;파이썬 입문&quot; in book)   # 값을 물으면? — 딕셔너리의 in은 값은 안 본다!">"파이썬 입문" in book <span class="vn">— 값을 물으면? (False!)</span></button>
+                <button data-find=".*" data-line="6" data-put="print(&quot;year&quot; in book)   # 다른 키를 물으면?">"year" in book <span class="vn">— 다른 키</span></button>
+                <button data-find=".*" data-line="6" data-put="print(book[&quot;Title&quot;])   # ⚠️ 대문자 T — 없는 키를 열면?">book["Title"] <span class="vn">— ⚠️ KeyError 관찰</span></button>
+                <button data-find=".*" data-line="6" data-put="print(&quot;title&quot; in book)   # 딕셔너리의 in은 키만 본다!">"title" in book <span class="vn">— ⟲ 원래대로</span></button>
+              </span>
+            </span>
+          </div>
+          <div class="lab-foot"></div>
+        </div>
+        <div class="subline" data-on="2" style="text-align:center"><b>있는 키</b>에 넣으면 값 수정, <b>없는 키</b>에 넣으면 새 항목 추가 — 4행과 5행을 비교하세요.</div>
+        <div class="subline" data-on="3" style="text-align:center">🔬 7행 — 같은 <code>in</code>인데 딕셔너리에선 <b>키만</b> 찾습니다. 바꿔보기 칩으로 값을 물어보면?</div>
+      </div>
+    </section>
+
+    <!-- S8 셋 -->
+    <section class="fscene" id="fs8">
+      <div class="schead"><span class="scno">SCENE 8</span><h2>셋 — 중복을 걸러내는 회수함</h2></div>
+      <div class="scbody"><div class="center" style="gap:12px">
+        <div class="row" data-on="0" style="justify-content:center; align-items:center">
+          <span class="actor">🧺</span>
+          <span class="card">넣는 족족 <b>중복을 자동으로 버리는</b> 회수함<div class="note" style="margin-top:4px">반납함의 같은 책, 방문 기록의 같은 회원 — 중복 제거엔 셋!</div></span>
+        </div>
+        <div class="codecard" data-on="1" style="max-width:620px">member_ids = {101, 205, 101, 333, 205, 101}   <span class="cm"># 오늘 방문 기록 (중복 포함 6번)</span>
+print(member_ids)        <span class="res"># {101, 333, 205}  ← 중복이 사라졌다! (순서도 제멋대로)</span>
+print(len(member_ids))   <span class="res"># 3  ← 실제 방문자는 3명</span>
+
+returned = {"파이썬 입문", "은하 항해술", "파이썬 입문", "파이썬 입문"}
+print(len(returned))     <span class="res"># 2  ← 같은 책은 한 권으로 접힌다</span></div>
+        <div class="card" data-on="2" style="max-width:530px; border-color:rgba(255,194,77,.4)">⚠️ <b>셋에는 순서가 없다</b> — "몇 번째"라는 개념 자체가 없어 <code>[0]</code> 인덱싱 불가!<div class="note" style="margin-top:4px">순서가 필요하면 리스트, 중복 제거가 필요하면 셋 — 용도가 다르다.</div></div>
+      </div></div>
+    </section>
+
+    <!-- S9 중첩 -->
+    <section class="fscene" id="fs9">
+      <div class="schead"><span class="scno">SCENE 9</span><h2>중첩 — 서가에 카드를 꽂다</h2></div>
+      <div class="scbody"><div class="center" style="gap:12px">
+        <div class="codecard" data-on="0" style="max-width:620px">book1 = {"title": "파이썬 입문", "author": "김우주"}
+book2 = {"title": "은하 항해술", "author": "나은하"}
+shelf = [book1, book2]   <span class="cm"># 서가에 카드 두 장 — 가구 안에 가구!</span></div>
+        <div class="row" data-on="1" style="justify-content:center">
+          <span class="card" style="font-size:13px"><code>print(shelf[1])</code><br><span class="note">→ {'title': '은하 항해술', 'author': '나은하'}<br>카드 <b>한 장</b> 통째로 (딕셔너리)</span></span>
+          <span class="card" style="font-size:13px"><code>print(shelf[1]["title"])</code><br><span class="note">→ 은하 항해술<br>그 카드의 <b>제목만</b> (문자열)</span></span>
+        </div>
+        <div class="card" data-on="2" style="max-width:530px">🪆 대괄호를 이어 붙이면 <b>바깥 가구부터 차례로</b> 한 겹씩 벗겨 들어간다<div class="note" style="margin-top:4px">서가 → 카드 → 항목. 이것이 장서 데이터베이스의 뼈대!</div></div>
+      </div></div>
+    </section>
+
+    <!-- S10 미션 + LAB6 -->
+    <section class="fscene" id="fs10">
+      <div class="schead"><span class="scno">SCENE 10</span><h2>미션 수행 — 장서 데이터베이스 구축</h2></div>
+      <div class="scbody">
+        <div class="lab" data-on="0" data-lab="lab6">
+          <div class="lab-head">🗄️ 최종 미션 — 카드 3장을 서가에 꽂고, 장서를 검색합니다 <span class="stat">엔진 준비 중…</span><button class="rst">⟲ 원래대로</button></div>
+          <div class="lab-body">
+            <textarea spellcheck="false" style="min-height:300px"># 우주 도서관 — 장서 데이터베이스 (EP.04 미션)
+book1 = {"title": "파이썬 입문", "author": "김우주", "year": 2021, "can_borrow": True}
+book2 = {"title": "은하 항해술", "author": "나은하", "year": 2023, "can_borrow": False}
+book3 = {"title": "블랙홀 요리책", "author": "성운재", "year": 2019, "can_borrow": True}
+
+shelf = [book1, book2, book3]                              # 서가에 카드 꽂기 (중첩)
+titles = [book1["title"], book2["title"], book3["title"]]  # 제목만 모은 검색용 선반
+
+print("=" * 30)
+print("🌌 우주 도서관 장서:", len(shelf), "권")
+print("=" * 30)
+
+keyword = "  은하 항해술  ".strip()          # EP.03의 검색어 다듬기 재사용
+print("검색어:", keyword)
+print("보유 여부:", keyword in titles)       # in으로 먼저 확인하고
+
+spot = titles.index(keyword)                 # index( )로 몇 번째 칸인지 알아내
+found = shelf[spot]                          # 서가에서 카드를 꺼낸다
+
+print("-" * 30)
+print("📖 제목:", found["title"])
+print("🖋 저자:", found["author"])
+print("📅 연도:", found["year"])
+print("✅ 대출 가능:", found["can_borrow"])
+print("=" * 30)</textarea>
+            <div class="lab-outs">
+              <div class="lab-out before"><span class="lbl">변경 전 (원본 결과)</span><span class="txt"></span></div>
+              <div class="lab-out after"><span class="lbl">내 결과 (실시간)</span><span class="txt"></span></div>
+            </div>
+          </div>
+          <div class="vrow">
+            <span class="vchip">검색어 바꿔보기 ▾
+              <span class="vpop"><span class="vt">13행의 검색어를 바꿔 장서를 검색해 보세요 (클릭하면 적용 · 칩 클릭 시 목록 고정)</span>
+                <button data-find=".*" data-line="12" data-put="keyword = &quot;블랙홀 요리책&quot;.strip()          # 다른 책 검색">"블랙홀 요리책" <span class="vn">— 다른 책 검색</span></button>
+                <button data-find=".*" data-line="12" data-put="keyword = &quot;  파이썬 입문  &quot;.strip()        # 공백 낀 검색어도 strip이 다듬는다">"  파이썬 입문  " <span class="vn">— 공백 낀 검색어도 OK</span></button>
+                <button data-find=".*" data-line="12" data-put="keyword = &quot;화성 요리책&quot;.strip()            # ⚠️ 없는 책이면? (해결은 다음 편 갈림길!)">"화성 요리책" <span class="vn">— ⚠️ 없는 책 (ValueError)</span></button>
+                <button data-find=".*" data-line="12" data-put="keyword = &quot;  은하 항해술  &quot;.strip()          # EP.03의 검색어 다듬기 재사용">"  은하 항해술  " <span class="vn">— ⟲ 원래대로</span></button>
+              </span>
+            </span>
+          </div>
+          <div class="lab-foot"></div>
+        </div>
+        <div class="subline" data-on="1" style="text-align:center"><code>in</code>으로 확인 → <code>index( )</code>로 칸 번호 → 서가에서 카드 꺼내기 — <b>배운 것만으로 완성!</b></div>
+        <div class="subline" data-on="2" style="text-align:center">책이 100권으로 늘어도 구조는 그대로 — <b>장서 데이터베이스 완공!</b> 🎉 (전체를 자동으로 도는 법은 다음 편에서)</div>
+      </div>
+    </section>
+
+    <!-- S11 함정 카드 -->
+    <section class="fscene" id="fs11">
+      <div class="schead"><span class="scno">SCENE 11</span><h2>함정 카드 — 다들 여기서 한 번씩 빠진다</h2></div>
+      <div class="scbody">
+        <div class="trap" data-on="0">⚠️ <b>함정 1 — 3권이니까 마지막은 3번? 없는 칸을 열면 IndexError</b><br>
+          3권짜리 서가의 칸은 0·1·2번 — <code>shelf[3]</code>은 <b>IndexError</b>!<br>
+          <span style="color:var(--sub); font-size:12.5px">마지막 칸은 항상 <code>len - 1</code>번. 헷갈리면 그냥 <code>[-1]</code>을 쓰자.</span></div>
+        <div class="trap" data-on="1">⚠️ <b>함정 2 — 키는 글자 하나까지 정확히, 없는 키를 열면 KeyError</b><br>
+          <code>book["Title"]</code> → <b>KeyError</b> — "Title"과 "title"은 남남!<br>
+          <span style="color:var(--sub); font-size:12.5px">EP.01의 "파이썬은 대소문자를 구분한다"가 여기서도 적용된다.</span></div>
+        <div class="trap" data-on="2">⚠️ <b>함정 3 — 밀봉된 것은 뜯을 수 없다: 튜플도, 문자열도</b><br>
+          <code>sealed[0] = "파이썬 급류"</code>도 <code>motto[0] = "물"</code>도 <b>TypeError</b> — 오류문까지 쌍둥이!<br>
+          <span style="color:var(--sub); font-size:12.5px">둘 다 <b>불변</b>이라서 그렇다. 바꾸고 싶으면 새로 만들어 다시 넣는 수밖에 없다.</span></div>
+      </div>
+    </section>
+
+    <!-- S12 정리 -->
+    <section class="fscene" id="fs12">
+      <div class="schead"><span class="scno">SCENE 12</span><h2>오늘의 항해 일지</h2></div>
+      <div class="scbody"><div class="center">
+        <div class="row" data-on="0" style="justify-content:center">
+          <span class="termtag">서가 = 리스트 📚</span><span class="termtag">밀봉 상자 = 튜플 📦</span><span class="termtag">도서 카드 = 딕셔너리 🗂</span>
+          <span class="termtag">회수함 = 셋 🧺</span><span class="termtag">"있나요?" = in 🔍</span>
+        </div>
+        <div class="card glow" data-on="1" style="max-width:470px">📒 오른쪽 위 <b>용어장</b>에서 오늘 모은 15개 용어를 복습하세요.<br><span class="note">용어를 클릭하면 그 장면으로 되돌아갑니다.</span></div>
+        <div class="card glow" data-on="2" style="max-width:470px; cursor:pointer" id="quizopen">🎯 <b>실력 점검 — 오늘의 퀴즈 10문제</b><div class="note" style="margin-top:5px">한 번에 한 문제씩, 5지선다. "🤔 그게 왜 정답이야?" 버튼으로 이유까지.<br>10문제를 모두 맞히면 <b>전체 문제 목록</b>이 잠금 해제!</div></div>
+        <div class="card" data-on="3" style="max-width:470px">🔮 <b>다음 편 — EP.05 갈림길과 궤도</b><div class="note" style="margin-top:5px">대출 가능? 불가능? 컴퓨터가 스스로 판정하고,<br>전체 장서를 한 바퀴 도는 법 — <b>대출 판정기</b>와 <b>전체 장서 점검</b>!</div></div>
+      </div></div>
+    </section>
+
+    <!-- 용어장 패널 -->
+    <div class="gpanel" id="gpanel">
+      <button class="gclose" id="gclose">✕</button>
+      <h3>📒 오늘의 용어장</h3>
+      <div class="gsub">영상이 진행되며 하나씩 채워집니다 · 용어를 클릭하면 해당 장면으로 이동</div>
+      <div class="ggrid" id="ggrid"></div>
+    </div>
+
+    <!-- 퀴즈 패널 -->
+    <div class="qpanel" id="qpanel">
+      <button class="qclosebtn" id="qclose">✕</button>
+      <div class="qhead"><h3>🎯 오늘의 퀴즈</h3><span class="qscore" id="qscore">0 / 10</span><span style="font-size:12px; color:var(--note)">한 번에 한 문제 · 계속 도전 가능</span></div>
+      <div class="qcard">
+        <div class="qq" id="qq"></div>
+        <div class="qchoices" id="qchoices"></div>
+        <div class="qfeed" id="qfeed"></div>
+        <button class="qnext" id="qwhybtn" style="background:linear-gradient(90deg,var(--vio),var(--blue)); margin-right:8px">🤔 그게 왜 정답이야?</button>
+        <button class="qnext" id="qnextbtn">다음 문제 ▶</button>
+      </div>
+      <div class="qlock" id="qlockwrap">
+        <div class="lockbar" id="qlockbar"><span class="ic">🔒</span><b>전체 문제 목록</b><span id="qlockmsg" style="margin-left:auto; font-size:12px; color:var(--note)">10문제를 모두 맞히면 열립니다</span></div>
+        <div class="lockpop" id="qlockpop">🔒 <b>잠금 메모</b><br>10문제를 <b>전부 한 번씩 맞히면</b> 이 목록이 열리고, 각 문제 위에 마우스를 올리면 <b>정답과 해설 메모</b>를 볼 수 있어요.<br><span id="qlockprog">현재 0 / 10</span></div>
+        <div class="qlist" id="qlist"></div>
+      </div>
+    </div>
+
+    <!-- 제미나이 질문 패널 -->
+    <div class="chatpanel" id="chatpanel">
+      <div class="ch-head">🤖 질문하기 — 제미나이(Gemini) 도우미 <button class="x" id="chclose">✕</button></div>
+      <div class="ch-msgs" id="chmsgs">
+        <div class="msg bot">안녕하세요! 영상 속 내용이든 파이썬 기초든, 궁금한 걸 편하게 물어보세요 🙂
+예) "리스트랑 튜플 차이가 뭐예요?", "딕셔너리 키가 뭔지 다시 설명해 줘"</div>
+      </div>
+      <div class="ch-keys" id="chkeys" hidden>
+        <div class="kt">🔑 Gemini API 키를 먼저 연결해 주세요 (무료 발급, 1분이면 끝!)</div>
+        <div class="krow"><input id="chkeyinput" type="password" placeholder="AIza… 형태의 API 키 붙여넣기"><button id="chkeysave">저장</button></div>
+        <div class="kn">① <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> 접속 → 구글 계정 로그인<br>② 파란 <b>[API 키 만들기]</b> 버튼 클릭 → 생성된 키 복사<br>③ 위 칸에 붙여넣고 저장 — 끝!<br>키는 <b>지금 이 브라우저에만</b> 저장되며, 어디로도 전송·업로드되지 않아요.</div>
+      </div>
+      <form class="ch-input" id="chform"><input id="chinput" autocomplete="off" placeholder="궁금한 것을 입력하세요…"><button type="submit">보내기</button></form>
+      <div class="ch-foot">Google Gemini API 사용 · <button type="button" id="chkeybtn">🔑 API 키 설정/변경</button> · 질문하면 지금 보고 있는 장면 정보가 함께 전달돼 맥락에 맞게 답해요</div>
+    </div>
+
+    <!-- 포스터 -->
+    <div class="poster" id="poster">
+      <div class="logo">🗄️</div>
+      <div class="ep">PYTHON RAPIDS · EPISODE 04</div>
+      <h2>서가 정리 — 자료구조 4형제</h2>
+      <div class="desc">아침에 문을 열자 상자가 산더미 — 라이카의 <b>기증 도서</b>가 쏟아졌다! 변수 하나에 하나씩 넣는 시대는 끝났다.<br>서가(<b>리스트</b>), 밀봉 상자(<b>튜플</b>), 도서 카드(<b>딕셔너리</b>), 회수함(<b>셋</b>)으로 책이 아무리 늘어도 끄떡없는 구조를 짓는다. 미션은 <b>장서 데이터베이스 구축</b>.</div>
+      <button class="bigplay" id="bigplay">▶ &nbsp;서가 정리 시작</button>
+      <div class="alt">약 8분 · 자동 재생 · 스페이스 = 재생/멈춤 · ← → = 장면 이동</div>
+      <div class="cr">만든이 <b>신영석</b> · <span class="ymseal">泳</span><span class="ymmark">Young Motion</span></div>
+    </div>
+  </div>
+
+  <div class="subwrap">
+    <div class="subbar"><span class="mic">💬</span><p id="sub">…</p></div>
+  </div>
+
+  <div class="deck">
+    <button class="nbtn" id="bprev">◀</button>
+    <button class="pbtn" id="bplay">▶</button>
+    <button class="nbtn" id="bnext">▶▶</button>
+    <div class="progresswrap">
+      <div class="progress" id="progress">
+        <div class="ticks" id="ticks"></div>
+        <div class="fill" id="pfill"></div>
+        <div class="knob" id="pknob"></div>
+      </div>
+      <div class="meta"><span class="scname" id="scname">—</span><span id="tmeta">0:00 / 0:00</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+/* ================= 대본 ================= */
+var SCENES=[
+  {id:'fs1', name:'프롤로그',         start:0},
+  {id:'fs2', name:'자료구조 4형제',   start:4},
+  {id:'fs3', name:'리스트 = 서가',    start:7},
+  {id:'fs4', name:'서가 정리 기술',   start:11},
+  {id:'fs5', name:'in — 있나요?',     start:15},
+  {id:'fs6', name:'튜플 · 불변',      start:18},
+  {id:'fs7', name:'딕셔너리 카드',    start:22},
+  {id:'fs8', name:'셋 = 회수함',      start:26},
+  {id:'fs9', name:'중첩',             start:29},
+  {id:'fs10',name:'미션 수행',        start:32},
+  {id:'fs11',name:'함정 카드',        start:35},
+  {id:'fs12',name:'항해 일지',        start:38}
+];
+var SAYS=[
+  // S1
+  '아침에 도서관 문을 열자 — 문 앞에 상자가 <b>산더미</b>! 첫 손님이었던 우주인 <b>라이카</b>가 씩 웃으며 서 있습니다.',
+  '"정착 기념으로 책을 좀 기증하려고요. …좀 많아요." 상자를 열어 보니 책이 <b>수십 권</b>. 순간 등골이 서늘해집니다.',
+  '지난 편의 도서 카드는 변수 4개로 책 <b>한 권</b>을 기억했죠. 그 방식으로 30권이면 이름표가 <b>120개</b>?! title1, title2, title3… 이건 창고가 아니라 미로예요.',
+  '오늘의 미션: <b>장서 데이터베이스 구축</b>. 책이 아무리 늘어도 끄떡없는 구조 — 서가, 밀봉 상자, 도서 카드, 회수함. 큰 가구 4형제를 들입니다! 🌊',
+  // S2
+  '변수는 물건 <b>하나</b>를 넣는 창고 칸이었습니다. 이제는 값 여러 개를 <b>한 이름표 아래 묶어서</b> 담는 큰 가구가 필요해요 — 이런 묶음 구조를 <span class="tchip">자료구조 (data structure)</span>라고 부릅니다.',
+  '파이썬이 기본으로 주는 대표 4형제 — 서가 한 줄, 밀봉 상자, 도서 카드, 중복 없는 회수함. 생김새는 <b>괄호 모양</b>으로 구분해요. (이 밖에도 더 있습니다)',
+  '이번 편은 속성 과정에서 <b>통째로 빠지기 쉬운 편</b>입니다. 하지만 실제 코드의 데이터는 거의 전부 이 4형제 안에 담겨요 — 급류를 탈 가치가 충분합니다!',
+  // S3
+  '첫째 가구, 서가 한 줄 — <span class="tchip">리스트 (list)</span>. 대괄호 [ ]에 쉼표로 나열해 만듭니다. 여러 값을 <b>순서대로</b> 담는 가장 기본 가구예요.',
+  '각 칸의 번호가 <span class="tchip">인덱스 (index)</span> — <b>0부터</b> 시작합니다! EP.03에서 문자열 글자를 셌던 규칙 그대로예요. <code>-1</code>은 맨 끝 칸!',
+  '<span class="tchip">len( ) (length)</span>은 서가의 줄자 — 안에 값이 <b>몇 개</b> 들었는지 알려줍니다. 실험실에서 칸 번호를 바꿔 보세요!',
+  '리스트를 통째로 print 하면 파이썬이 작은따옴표로 감싸 보여줍니다 — 정상이에요. 칸 번호를 3으로 바꾸면 어떤 안내문이 나오는지도 훌륭한 실험!',
+  // S4
+  '기증 도서를 정리하려면 서가를 <b>고칠</b> 수 있어야죠. <span class="tchip">append( )</span>는 맨 끝에 꽂기, <span class="tchip">remove( )</span>는 값을 찾아 빼기입니다.',
+  '<code>서가[칸 번호] = 새 값</code>이면 그 칸의 책 교체! 리스트는 자유롭게 고쳐지는 가구입니다. (insert, sort 등 기술은 이 밖에도 많아요)',
+  '구간을 통째로 꺼내는 <span class="tchip">슬라이스 (slice)</span> — <code>[시작:끝]</code>, <b>끝 번호 직전까지</b>라는 규칙도 EP.03 문자열과 완전히 같습니다.',
+  '미세한 차이 관찰 — <code>shelf[0]</code>은 책 <b>한 권</b>(문자열), <code>shelf[0:1]</code>은 책 한 권이 꽂힌 <b>서가 조각</b>(리스트). 콜론 유무가 결과의 종류를 가릅니다!',
+  // S5
+  '손님이 가장 많이 하는 질문, "그 책 있나요?" — 서가를 눈으로 훑을 필요 없이 <span class="tchip">in (멤버십 연산자)</span> 한 단어로 True/False를 받습니다.',
+  '몇 번째 칸인지까지 알려면 <span class="tchip">index( )</span>. in은 <b>있냐/없냐</b>, index( )는 <b>어느 칸인지</b> — 질문이 다르면 도구도 다릅니다.',
+  '⚠️ index( )에 <b>없는 값</b>을 물으면 <b>ValueError</b>! 그래서 실전에서는 in으로 먼저 확인하고 index( )를 쓰는 순서가 안전합니다 — 이번 미션에서 그대로 써요.',
+  // S6
+  '거의 같은 코드 두 개를 나란히 놓았습니다. 다른 곳은 <b>괄호 모양뿐</b> — 대괄호는 교체 성공, 소괄호는…?',
+  '소괄호로 만들면 <span class="tchip">튜플 (tuple)</span> — <b>만들 때 밀봉되는 상자</b>입니다. 읽기는 자유지만, 내용물을 바꾸려 하면 TypeError!',
+  '고칠 수 있으면 가변, 못 고치면 불변 — <span class="tchip">가변 vs 불변 (mutable vs immutable)</span>. 리스트·딕셔너리·셋은 가변, 튜플·문자열은 불변입니다.',
+  'EP.03에서 "문자열은 글자 하나만 바꿀 수 없다"고 했죠 — 문자열도 <b>불변</b>이라서예요. 튜플의 TypeError와 같은 이유! 실험실에서 괄호를 바꿔 직접 관찰해 보세요.',
+  // S7
+  '지난 편 미션에선 변수 4개가 <b>따로</b> 놀았습니다. <span class="tchip">딕셔너리 (dict)</span>는 이 넷을 <b>카드 한 장</b>으로 묶어요 — 중괄호 {키: 값}!',
+  '<span class="tchip">키와 값 (key & value)</span> — 키는 항목의 이름표, 값은 내용. 칸 번호가 아니라 <b>키로</b> 꺼냅니다. <code>book["title"]</code>처럼요!',
+  '<b>있는 키</b>에 넣으면 값 수정, <b>없는 키</b>에 넣으면 새 항목 추가 — 실험실 4행과 5행이 하는 일이 서로 다릅니다. 직접 확인!',
+  '미세한 차이 관찰 — 같은 in인데 리스트에서는 <b>값</b>을, 딕셔너리에서는 <b>키</b>를 찾습니다. 어디에 대고 묻느냐에 따라 질문의 뜻이 달라져요!',
+  // S8
+  '반납함에는 같은 책이 여러 번, 방문 기록엔 같은 회원이 여러 번. <span class="tchip">셋 (set)</span>은 넣는 족족 <b>중복을 자동으로 버리는</b> 회수함입니다.',
+  '방문 기록을 6번 넣었는데 남은 건 3개 — 같은 값은 한 개로 접힙니다. 실제 방문자 수를 세는 데 딱이죠!',
+  '⚠️ 단, <b>셋에는 순서가 없습니다.</b> "몇 번째"라는 개념 자체가 없어 인덱싱 불가! 순서가 필요하면 리스트, 중복 제거가 필요하면 셋 — 용도가 다릅니다.',
+  // S9
+  '오늘의 완성형 — 카드(딕셔너리)를 서가(리스트)에 꽂습니다. 가구 안에 가구를 넣는 것을 <span class="tchip">중첩 (nesting)</span>이라 불러요.',
+  '<code>shelf[1]</code>은 카드 <b>한 장</b> 통째로(딕셔너리), <code>shelf[1]["title"]</code>은 그 카드의 <b>제목만</b>(문자열) — 이것도 미세한 차이!',
+  '대괄호를 이어 붙이면 <b>바깥 가구부터 차례로</b> 한 겹씩 벗겨 들어갑니다. 서가 → 카드 → 항목 — 장서 데이터베이스의 뼈대 완성!',
+  // S10
+  '드디어 최종 미션 — 카드 3장을 서가에 꽂고, EP.03의 strip으로 검색어를 다듬어 <b>장서를 검색</b>합니다. 배운 것만으로 전부 만들어요!',
+  'in으로 보유를 확인하고 → index( )로 칸 번호를 알아내 → 서가에서 카드를 꺼냅니다. 검색어를 바꿔 보세요 — 없는 책이면 어떻게 될까요?',
+  '책이 100권으로 늘어도 구조는 그대로 — 카드를 만들어 꽂기만 하면 됩니다. 축하합니다, 사서님. <b>장서 데이터베이스 완공!</b> 🎉',
+  // S11
+  '떠나기 전, 함정 셋! 함정 1 — 3권짜리 서가의 칸은 0·1·2번. <code>shelf[3]</code>은 <span class="tchip">IndexError</span>! 마지막 칸은 <b>len - 1</b>, 헷갈리면 [-1].',
+  '함정 2 — 키는 <b>글자 하나까지 정확히</b>. "Title"과 "title"은 남남 — 없는 키를 열면 <span class="tchip">KeyError</span>! EP.01의 대소문자 구분이 여기서도 적용됩니다.',
+  '함정 3 — <b>밀봉된 것은 뜯을 수 없다.</b> 튜플도 문자열도 TypeError, 오류문까지 쌍둥이 — 둘 다 불변이라서. 바꾸려면 새로 만들어 다시 넣는 수밖에요!',
+  // S12
+  '오늘의 항해 일지 — 서가는 리스트, 밀봉 상자는 튜플, 도서 카드는 딕셔너리, 회수함은 셋. 그리고 in, len( ), 슬라이스까지!',
+  '오른쪽 위 📒 용어장에 <b>15개 용어</b>가 모였습니다. 클릭하면 그 장면으로 되돌아가요.',
+  '마지막 관문! 🎯 <b>오늘의 퀴즈 10문제</b> — 초록 카드를 클릭하면 시작. 10문제를 모두 맞히면 전체 목록이 열립니다.',
+  '다음 편 — 라이카가 묻습니다. "이 책, 지금 빌릴 수 있어요?" 컴퓨터가 스스로 판정하는 갈림길(if), 전체 장서를 한 바퀴 도는 궤도(for)! 수고하셨습니다! 🌊'
+];
+/* 용어장 */
+var GLOSS=[
+  {say:7,  n:'리스트',         e:'list',                  d:'서가 한 줄 — 순서 있는 값들의 묶음, [ ] 대괄호, 자유롭게 수정'},
+  {say:8,  n:'인덱스',         e:'index',                 d:'칸 번호 — 0부터 시작, -1은 맨 끝'},
+  {say:9,  n:'len( )',         e:'length',                d:'서가의 줄자 — 안에 든 값의 개수를 알려준다'},
+  {say:11, n:'append( )',      e:'append',                d:'새 책 꽂기 — 리스트 맨 끝에 값 추가'},
+  {say:11, n:'remove( )',      e:'remove',                d:'책 빼기 — 값을 찾아 리스트에서 삭제'},
+  {say:13, n:'슬라이스',       e:'slice',                 d:'구간 꺼내기 — [시작:끝], 끝 번호 직전까지'},
+  {say:15, n:'in',             e:'멤버십 연산자',         d:'"있나요?" — 들어 있으면 True, 없으면 False'},
+  {say:16, n:'index( )',       e:'index method',          d:'"몇 번째 칸?" — 값이 꽂힌 칸 번호를 알려준다 (없으면 ValueError)'},
+  {say:19, n:'튜플',           e:'tuple',                 d:'밀봉 상자 — 순서 있음 + 수정 불가, ( ) 소괄호'},
+  {say:22, n:'딕셔너리',       e:'dict',                  d:'도서 카드 — 키: 값 쌍의 묶음, { } 중괄호'},
+  {say:23, n:'키와 값',        e:'key & value',           d:'카드의 이름표와 내용 — 키로 값을 꺼낸다: book["title"]'},
+  {say:26, n:'셋',             e:'set',                   d:'중복 없는 회수함 — 중복 자동 제거, 순서 없음, 인덱싱 불가'},
+  {say:20, n:'가변 vs 불변',   e:'mutable vs immutable',  d:'고칠 수 있냐 없냐 — list·dict·set은 가변 / tuple·str은 불변'},
+  {say:35, n:'IndexError',     e:'없는 칸 오류',          d:'없는 인덱스를 꺼내려 할 때 — 마지막 칸은 len-1'},
+  {say:36, n:'KeyError',       e:'없는 키 오류',          d:'없는 키를 꺼내려 할 때 — 키는 글자 하나까지 정확히'}
+];
+
+/* ================= 타임라인 (유튜브식 연속 진행) ================= */
+function durOf(html){
+  var text=html.replace(/<[^>]*>/g,'');
+  return Math.max(3000, Math.min(7600, 1700 + text.length*62));
+}
+var DUR=SAYS.map(durOf);
+var CUM=[0]; for(var i=0;i<DUR.length;i++) CUM.push(CUM[i]+DUR[i]);
+var TOTAL=CUM[CUM.length-1];
+
+var line=-1, playing=false, lineStart=0, lineElapsed=0, raf=null, maxSeen=-1;
+
+var elSub=$('#sub'), elFill=$('#pfill'), elKnob=$('#pknob'), elMeta=$('#tmeta'), elScname=$('#scname');
+var elPlay=$('#bplay');
+
+function fmt(ms){ var s=Math.round(ms/1000); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
+function sceneOf(n){ var s=SCENES[0]; for(var i=0;i<SCENES.length;i++) if(SCENES[i].start<=n) s=SCENES[i]; return s; }
+
+function render(n){
+  var sc=sceneOf(n), beat=n-sc.start;
+  SCENES.forEach(function(s){ $('#'+s.id).classList.toggle('act', s===sc); });
+  $$('.fscene [data-on]').forEach(function(el){
+    if(el.closest('.fscene').id!==sc.id) return;
+    el.classList.toggle('on', +el.getAttribute('data-on')<=beat);
+  });
+  elSub.innerHTML=SAYS[n];
+  elScname.textContent='SCENE '+(SCENES.indexOf(sc)+1)+' · '+sc.name;
+  if(n>maxSeen){ maxSeen=n; refreshGloss(); }
+}
+function refreshGloss(){
+  var got=0;
+  $$('#ggrid .gitem').forEach(function(it,i){
+    var g=GLOSS[i], ok=g.say<=maxSeen;
+    it.classList.toggle('locked', !ok);
+    if(ok) got++;
+  });
+  $('#gcnt').textContent=got+' / '+GLOSS.length;
+}
+function seek(n, keepPlaying){
+  n=Math.max(0, Math.min(SAYS.length-1, n));
+  line=n; lineElapsed=0; lineStart=performance.now();
+  render(n);
+  if(keepPlaying===undefined ? playing : keepPlaying) play(); else drawBar();
+}
+function tick(now){
+  if(!playing) return;
+  var el=now-lineStart+lineElapsed;
+  if(el>=DUR[line]){
+    if(line>=SAYS.length-1){ pause(); drawBar(1); return; }
+    line++; lineElapsed=0; lineStart=now; render(line);
+  }
+  drawBar();
+  raf=requestAnimationFrame(tick);
+}
+function drawBar(forceRatio){
+  var el=playing? (performance.now()-lineStart+lineElapsed) : lineElapsed;
+  el=Math.min(el, DUR[Math.max(line,0)]||1);
+  var t=(CUM[Math.max(line,0)]+el);
+  var r=forceRatio!==undefined? forceRatio : t/TOTAL;
+  elFill.style.width=(r*100)+'%';
+  elKnob.style.left=(r*100)+'%';
+  elMeta.textContent=fmt(t)+' / '+fmt(TOTAL);
+}
+function play(){
+  if(line<0) seekStart();
+  playing=true; elPlay.textContent='❚❚';
+  lineStart=performance.now();
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+}
+function pause(){
+  if(playing){ lineElapsed+=performance.now()-lineStart; }
+  playing=false; elPlay.textContent='▶';
+  cancelAnimationFrame(raf);
+}
+function seekStart(){ line=0; lineElapsed=0; render(0); }
+
+elPlay.addEventListener('click', function(){ playing? pause() : play(); });
+$('#bprev').addEventListener('click', function(){ var sc=sceneOf(Math.max(line,0)); var i=SCENES.indexOf(sc); seek(line===sc.start && i>0 ? SCENES[i-1].start : sc.start); });
+$('#bnext').addEventListener('click', function(){ var sc=sceneOf(Math.max(line,0)); var i=SCENES.indexOf(sc); if(i<SCENES.length-1) seek(SCENES[i+1].start); });
+document.addEventListener('keydown', function(e){
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ e.preventDefault(); playing? pause():play(); }
+  if(e.key==='ArrowLeft') $('#bprev').click();
+  if(e.key==='ArrowRight') $('#bnext').click();
+});
+
+var prog=$('#progress'), dragging=false;
+function barSeek(ev){
+  var r=prog.getBoundingClientRect();
+  var x=(ev.touches? ev.touches[0].clientX : ev.clientX)-r.left;
+  var t=Math.max(0,Math.min(1,x/r.width))*TOTAL;
+  var n=0; while(n<SAYS.length-1 && CUM[n+1]<=t) n++;
+  line=n; lineElapsed=t-CUM[n]; lineStart=performance.now();
+  render(n); drawBar();
+}
+prog.addEventListener('mousedown', function(e){ dragging=true; var was=playing; pause(); barSeek(e);
+  var mv=function(e2){ if(dragging) barSeek(e2); };
+  var up=function(){ dragging=false; document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); if(was) play(); };
+  document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+});
+(function(){
+  var t=$('#ticks');
+  SCENES.forEach(function(s,i){ if(i===0) return;
+    var d=document.createElement('div'); d.className='tick'; d.style.left=(CUM[s.start]/TOTAL*100)+'%'; t.appendChild(d);
+  });
+})();
+
+/* ================= 용어장 ================= */
+(function(){
+  var grid=$('#ggrid');
+  GLOSS.forEach(function(g){
+    var it=document.createElement('div');
+    it.className='gitem locked';
+    it.innerHTML='<span class="gn">'+g.n+'</span> <span class="ge">'+g.e+'</span><div class="gd">'+g.d+'</div>';
+    it.addEventListener('click', function(){ $('#gpanel').classList.remove('open'); seek(g.say, false); pause(); drawBar(); });
+    grid.appendChild(it);
+  });
+})();
+$('#gbadge').addEventListener('click', function(){ $('#gpanel').classList.add('open'); pause(); });
+$('#gclose').addEventListener('click', function(){ $('#gpanel').classList.remove('open'); });
+
+/* ================= 포스터 ================= */
+$('#bigplay').addEventListener('click', function(){
+  $('#poster').style.display='none';
+  loadPy();
+  seek(0,false); play();
+});
+
+/* ================= 라이브 실험실 ================= */
+var pyReady=false, py=null, pyLoading=false;
+function loadPy(){
+  if(pyLoading||pyReady) return; pyLoading=true;
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+  s.onload=function(){
+    loadPyodide().then(function(p){
+      py=p;
+      // input( ) 을 "가상 답변" 큐와 연결 — 실험실에서 input 실습 가능!
+      py.globals.set('js_input', function(){
+        if(window.__stdinq && window.__stdinq.length) return window.__stdinq.shift();
+        return '';
+      });
+      py.runPython('import builtins\ndef _ym_input(prompt=""):\n    print(prompt, end="")\n    v = str(js_input())\n    print(v)\n    return v\nbuiltins.input = _ym_input\n');
+      pyReady=true;
+      $$('.lab .stat').forEach(function(st){ st.textContent='엔진 준비 완료 ✓'; st.classList.add('ok'); });
+      LABS.forEach(function(L){ runLab(L,true); runLab(L,false); });
+    });
+  };
+  s.onerror=function(){ $$('.lab .stat').forEach(function(st){ st.textContent='엔진 로드 실패 — 인터넷 연결 확인'; }); };
+  document.head.appendChild(s);
+}
+function pyRun(code){
+  var out='';
+  try{
+    py.setStdout({batched:function(t){ out+=t+'\n'; }});
+    py.setStderr({batched:function(t){ out+=t+'\n'; }});
+    py.runPython(code);
+    return {ok:true, out:out.replace(/\n$/,'')};
+  }catch(e){
+    var m=String(e.message||e);
+    var lines=m.trim().split('\n');
+    var last=lines[lines.length-1];
+    return {ok:false, out:(out?out+'\n':'')+last, full:m};
+  }
+}
+var LABS=[];
+$$('.lab').forEach(function(labEl){
+  var ta=$('textarea',labEl);
+  var stdinEl=$('.lab-stdin input',labEl);
+  var L={
+    el:labEl, ta:ta, base:ta.value, stdin:stdinEl,
+    before:$('.lab-out.before .txt',labEl),
+    afterBox:$('.lab-out.after',labEl),
+    after:$('.lab-out.after .txt',labEl),
+    foot:$('.lab-foot',labEl), timer:null
+  };
+  LABS.push(L);
+  ta.addEventListener('focus', loadPy);
+  ta.addEventListener('input', function(){
+    clearTimeout(L.timer);
+    L.timer=setTimeout(function(){ runLab(L,false); },300);
+  });
+  if(stdinEl){
+    stdinEl.addEventListener('input', function(){
+      clearTimeout(L.timer);
+      L.timer=setTimeout(function(){ runLab(L,false); },300);
+    });
+  }
+  $('.rst',labEl).addEventListener('click', function(){
+    ta.value=L.base;
+    if(L.stdin) L.stdin.value=L.stdin.getAttribute('data-default');
+    runLab(L,false);
+  });
+  $$('.vpop button',labEl).forEach(function(b){
+    b.addEventListener('click', function(){
+      var find=new RegExp(b.getAttribute('data-find'), b.getAttribute('data-all')?'g':'');
+      var lineIdx=b.getAttribute('data-line');
+      if(lineIdx!==null && !b.getAttribute('data-all')){
+        var rows=ta.value.split('\n');
+        rows[+lineIdx]=rows[+lineIdx].replace(find, b.getAttribute('data-put'));
+        ta.value=rows.join('\n');
+      }else{
+        ta.value=ta.value.replace(find, b.getAttribute('data-put'));
+      }
+      runLab(L,false);
+      ta.focus();
+    });
+  });
+});
+function stdinQueue(L, isBase){
+  if(!L.stdin) return [];
+  var v=isBase? L.stdin.getAttribute('data-default') : L.stdin.value;
+  // 쉼표(또는 줄바꿈)로 구분된 답변들을 순서대로 큐에 담는다
+  return String(v||'').split(/[\n,]/).map(function(s){ return s.trim(); });
+}
+function runLab(L, isBase){
+  if(!pyReady){
+    (isBase? L.before : L.after).textContent='(재생을 시작하면 파이썬 엔진이 준비됩니다)';
+    return;
+  }
+  window.__stdinq=stdinQueue(L, isBase);
+  var code=isBase? L.base : L.ta.value;
+  var r=pyRun(code);
+  var target=isBase? L.before : L.after;
+  if(r.ok){ target.textContent=r.out || '(출력 없음)'; if(!isBase) target.classList.remove('err'); }
+  else{ target.innerHTML='<span class="err">'+escapeHtml(r.out)+'</span>'; }
+  if(!isBase){
+    var changed=L.ta.value!==L.base || (L.stdin && L.stdin.value!==L.stdin.getAttribute('data-default'));
+    var differs=L.before.textContent!==L.after.textContent;
+    L.afterBox.classList.toggle('diff', differs);
+    L.foot.innerHTML = !changed
+      ? '아직 원본 그대로예요 — 마음껏 바꿔 보세요!'
+      : differs
+        ? '<span class="changed">🎛 결과가 원본과 달라졌어요 — 코드(또는 가상 답변)의 어느 부분이 이 차이를 만들었을까요?</span>'
+        : '<span class="same">✓ 코드는 바꿨지만 결과는 원본과 같아요 — 이것도 훌륭한 발견!</span>';
+  }
+}
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* 변형 칩 호버 → 코드 해당 부분 하이라이트 */
+$$('.vpop button').forEach(function(b){
+  var lab=b.closest('.lab'), ta=$('textarea',lab);
+  function slotRange(){
+    var find=new RegExp(b.getAttribute('data-find'));
+    var lineIdx=b.getAttribute('data-line');
+    var v=ta.value;
+    if(lineIdx!==null && !b.getAttribute('data-all')){
+      var rows=v.split('\n'), off=0;
+      for(var i=0;i<+lineIdx;i++) off+=rows[i].length+1;
+      var m=rows[+lineIdx] && rows[+lineIdx].match(find);
+      if(m) return [off+m.index, off+m.index+m[0].length];
+    }else{
+      var m2=v.match(find);
+      if(m2) return [m2.index, m2.index+m2[0].length];
+    }
+    return null;
+  }
+  b.addEventListener('mouseenter', function(){
+    var r=slotRange();
+    if(r){ ta.focus({preventScroll:true}); ta.setSelectionRange(r[0], r[1]); }
+  });
+  b.addEventListener('mouseleave', function(){
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  });
+});
+/* 칩 클릭 = 팝업 고정/해제 */
+$$('.vchip').forEach(function(ch){
+  ch.addEventListener('click', function(e){
+    if(e.target.closest('.vpop')) return;
+    var was=ch.classList.contains('pin');
+    $$('.vchip.pin').forEach(function(c){ c.classList.remove('pin'); });
+    if(!was) ch.classList.add('pin');
+    e.stopPropagation();
+  });
+});
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.vchip')) $$('.vchip.pin').forEach(function(c){ c.classList.remove('pin'); });
+});
+
+/* ============ 퀴즈 ============ */
+var QUIZ=[
+ {q:'<code>shelf = ["파이썬 입문", "은하 항해술", "블랙홀 요리책"]</code> 에서 <code>print(shelf[0])</code> 의 출력은?', a:'파이썬 입문 — 칸 번호는 0부터',
+  wrongs:['은하 항해술','블랙홀 요리책','0','오류가 난다','서가 전체가 나온다'],
+  why:{q:'왜 1번이 아니라 0번부터 셀까요?', a:'파이썬의 칸 번호(인덱스)는 언제나 0부터 시작하는 약속이라서 — 문자열도 리스트도 같다',
+   wrongs:['0이 행운의 숫자라서','첫 칸은 공짜라서','컴퓨터가 1을 못 세서','리스트만의 예외 규칙이라서']},
+  memo:'인덱스는 0부터 — 3권짜리 서가의 칸은 0·1·2번'},
+ {q:'3권짜리 리스트에서 <code>print(shelf[3])</code> 을 실행하면?', a:'IndexError — 없는 칸이라서',
+  wrongs:['마지막 책이 나온다','None이 조용히 나온다','서가가 자동으로 늘어난다','3이 출력된다','컴퓨터가 아무 책이나 골라준다'],
+  why:{q:'마지막 칸을 안전하게 여는 방법은?', a:'shelf[-1] — 마지막 칸은 항상 len - 1번이라, -1로 여는 게 안전하다',
+   wrongs:['shelf[len]을 쓴다','shelf[999]를 쓴다','shelf[끝]이라고 적는다','마지막 칸은 열 수 없다']},
+  memo:'함정 1 — 마지막 칸은 len-1, 헷갈리면 [-1]'},
+ {q:'<code>len(shelf)</code> 가 하는 일은?', a:'안에 값이 몇 개 들었는지 알려준다 (서가의 줄자)',
+  wrongs:['서가를 길게 늘린다','첫 번째 값을 꺼낸다','서가를 가나다순으로 정렬한다','마지막 값을 삭제한다','서가의 무게를 잰다'],
+  why:{q:'개수를 왜 파이썬에게 시킬까요?', a:'책이 100권, 1000권으로 늘면 눈으로 못 센다 — 개수 세기는 파이썬이 정확하다',
+   wrongs:['사람은 3까지만 셀 수 있어서','len( )을 안 쓰면 벌금이라서','리스트가 세는 걸 부끄러워해서','print( )가 고장 나서']},
+  memo:'len( ) = 개수. 문자열 길이에도 통한다 (EP.03)'},
+ {q:'리스트 맨 끝에 새 책을 꽂는 방법은?', a:'shelf.append("화성 정원 가꾸기")',
+  wrongs:['shelf.add("화성 정원 가꾸기")','shelf.push("화성 정원 가꾸기")','shelf.remove("화성 정원 가꾸기")','shelf + "화성 정원 가꾸기"','shelf.책꽂기("화성 정원 가꾸기")'],
+  why:{q:'append와 remove의 차이는?', a:'append는 맨 끝에 꽂기, remove는 값을 찾아 빼기 — 방향이 반대다',
+   wrongs:['둘은 완전히 같은 일을 한다','append는 맨 앞에 꽂는다','remove는 책을 반으로 찢는다','append는 하루 한 번만 쓸 수 있다']},
+  memo:'append(값)=맨 끝에 추가, remove(값)=값 찾아 삭제'},
+ {q:'<code>shelf[0:2]</code> 가 꺼내는 것은?', a:'0번부터 2번 직전까지 — 0번과 1번 칸 (리스트로)',
+  wrongs:['0번부터 2번까지 세 칸','0번 칸 하나만','2번 칸 하나만','0과 2를 곱한 값','오류가 난다'],
+  why:{q:'shelf[0]과 shelf[0:1]의 차이는?', a:'shelf[0]은 책 한 권(문자열), shelf[0:1]은 책 한 권이 꽂힌 서가 조각(리스트) — 콜론 유무로 종류가 달라진다',
+   wrongs:['둘은 완전히 같다','[0:1]이 조금 더 빠를 뿐이다','[0]은 항상 오류다','콜론은 그냥 장식이다']},
+  memo:'슬라이스 [시작:끝] — 끝 번호 직전까지. EP.03 문자열과 같은 규칙'},
+ {q:'<code>"은하 항해술" in shelf</code> 가 답해 주는 것은?', a:'있으면 True, 없으면 False — 있냐/없냐만',
+  wrongs:['몇 번째 칸인지 번호','책의 저자 이름','서가 전체 목록','"네"라는 한국어 대답','항상 오류'],
+  why:{q:'몇 번째 칸인지까지 알려면?', a:'shelf.index("은하 항해술") — in은 있냐/없냐, index( )는 어느 칸인지 답한다',
+   wrongs:['in을 두 번 연달아 쓴다','len( )으로 잰다','셋으로 바꿔서 물어본다','눈으로 직접 센다']},
+  memo:'in=True/False, index( )=칸 번호 (없는 값이면 ValueError!)'},
+ {q:'튜플 <code>sealed = ("파이썬 입문", "은하 항해술")</code> 에 <code>sealed[0] = "파이썬 급류"</code> 를 실행하면?', a:'TypeError — 튜플은 밀봉 상자라 수정 불가',
+  wrongs:['교체에 성공한다','자동으로 리스트로 변신한다','새 튜플이 하나 더 생긴다','경고만 뜨고 넘어간다','파이썬이 잠시 고민한다'],
+  why:{q:'튜플과 문자열의 공통점은?', a:'둘 다 불변(immutable) — 만든 뒤엔 내용물을 못 바꾼다, 오류문까지 쌍둥이다',
+   wrongs:['둘 다 숫자만 담을 수 있다','둘 다 대괄호를 쓴다','둘 다 len( )이 안 통한다','둘 다 최신 파이썬에서 사라졌다']},
+  memo:'가변=list·dict·set / 불변=tuple·str. 바꾸려면 새로 만들기'},
+ {q:'<code>book = {"title": "파이썬 입문"}</code> 에서 <code>print(book["Title"])</code> 은?', a:'KeyError — "Title"과 "title"은 남남',
+  wrongs:['파이썬 입문이 출력된다','자동으로 소문자로 고쳐준다','None이 나온다','빈 카드가 나온다','대문자가 더 정중해서 잘 나온다'],
+  why:{q:'왜 대문자 하나에 이렇게 엄격할까요?', a:'파이썬은 대소문자를 구분한다(EP.01) — 키는 글자 하나까지 정확히 일치해야 한다',
+   wrongs:['파이썬이 소문자를 편애해서','Caps Lock 버그 때문에','대문자는 유료 기능이라서','딕셔너리가 화가 나서']},
+  memo:'함정 2 — 없는 키를 열면 KeyError. 키는 글자 하나까지 정확히'},
+ {q:'<code>book = {"title": "파이썬 입문"}</code> 일 때 <code>"파이썬 입문" in book</code> 의 결과는?', a:'False — 딕셔너리의 in은 키만 보고 값은 안 본다',
+  wrongs:['True — 값도 찾아준다','"title"이 출력된다','KeyError가 난다','파이썬이 되물어본다','상황에 따라 다르다'],
+  why:{q:'같은 in인데 왜 결과가 다를까요?', a:'리스트의 in은 값을, 딕셔너리의 in은 키를 찾는다 — 어디에 대고 묻느냐로 뜻이 달라진다',
+   wrongs:['in이 기분파라서','딕셔너리가 값을 숨기는 버릇이 있어서','따옴표 개수가 달라서','in은 원래 아무거나 답해서']},
+  memo:'dict의 in은 키 검사 — 값 검사가 아니다!'},
+ {q:'<code>member_ids = {101, 205, 101, 333, 205, 101}</code> 일 때 <code>len(member_ids)</code> 는?', a:'3 — 셋은 중복을 자동으로 버린다',
+  wrongs:['6','1','0','101','오류가 난다'],
+  why:{q:'셋에서 member_ids[0]이 안 되는 이유는?', a:'셋에는 순서가 없어서 — "몇 번째"라는 개념 자체가 없다',
+   wrongs:['0번은 예약석이라서','셋이 수줍음이 많아서','대괄호 재고가 부족해서','101이 첫 자리를 독차지해서']},
+  memo:'셋=중복 제거+순서 없음. 순서가 필요하면 리스트'}
+];
+var qSolved=(function(){ try{ return new Set(JSON.parse(localStorage.getItem('rapids_ep04_quiz')||'[]')); }catch(e){ return new Set(); } })();
+var qCur=-1, qMode='main';
+var elQq=$('#qq'), elQch=$('#qchoices'), elQf=$('#qfeed'), elQnext=$('#qnextbtn'), elQwhy=$('#qwhybtn');
+
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function sample(a,n){ return shuffle(a).slice(0,n); }
+function saveQuiz(){ localStorage.setItem('rapids_ep04_quiz', JSON.stringify(Array.from(qSolved))); }
+function updateQuizUI(){
+  $('#qcnt').textContent=qSolved.size+' / 10';
+  $('#qscore').textContent=qSolved.size+' / 10';
+  $('#qlockprog').textContent='현재 '+qSolved.size+' / 10';
+  var open=qSolved.size>=QUIZ.length;
+  $('#qlockbar .ic').textContent=open?'🔓':'🔒';
+  $('#qlockmsg').textContent=open?'모든 문제 완료! 아래 목록에 마우스를 올려 해설을 보세요':'10문제를 모두 맞히면 열립니다';
+  var list=$('#qlist');
+  list.classList.toggle('open', open);
+  if(open && !list.children.length){
+    QUIZ.forEach(function(Q,i){
+      var it=document.createElement('div');
+      it.className='qitem';
+      it.innerHTML='<span class="qi-n">Q'+(i+1)+'</span>'+Q.q+
+        '<div class="qi-pop">✅ <span class="ans">'+Q.a+'</span><br>💡 '+Q.memo+'</div>';
+      list.appendChild(it);
+    });
+  }
+}
+function nextQuestion(){
+  var pool=[]; QUIZ.forEach(function(_,i){ if(!qSolved.has(i)) pool.push(i); });
+  if(!pool.length) pool=QUIZ.map(function(_,i){ return i; });
+  qCur=pool[Math.floor(Math.random()*pool.length)];
+  qMode='main';
+  renderQ(QUIZ[qCur].q, QUIZ[qCur].a, sample(QUIZ[qCur].wrongs,4), '문제 '+(qCur+1));
+}
+function renderQ(qHtml, answer, wrongs, tag){
+  elQq.innerHTML='<span class="qtag">'+tag+'</span>'+qHtml;
+  elQf.className='qfeed'; elQf.innerHTML='';
+  elQnext.classList.remove('show'); elQwhy.classList.remove('show');
+  elQch.innerHTML='';
+  shuffle([answer].concat(wrongs)).forEach(function(c){
+    var b=document.createElement('button');
+    b.className='qchoice'; b.innerHTML=c;
+    b.addEventListener('click', function(){ answerQ(b, c===answer, answer); });
+    elQch.appendChild(b);
+  });
+}
+function answerQ(btn, ok, answer){
+  $$('.qchoice',elQch).forEach(function(b){ b.disabled=true; if(b.innerHTML===answer) b.classList.add('correct'); });
+  if(!ok) btn.classList.add('wrong');
+  var Q=QUIZ[qCur];
+  if(qMode==='main'){
+    if(ok){
+      qSolved.add(qCur); saveQuiz(); updateQuizUI();
+      elQf.className='qfeed ok';
+      elQf.innerHTML='🎉 정답! <b>'+(qSolved.size)+' / 10</b> 달성 — 💡 '+Q.memo;
+      elQnext.classList.add('show'); elQwhy.classList.add('show');
+    }else{
+      elQf.className='qfeed no';
+      elQf.innerHTML='아쉬워요! 정답은 <b>'+Q.a+'</b> 입니다.<br>궁금하면 아래 <b>🤔 그게 왜 정답이야?</b> 버튼을 눌러 보세요 — 이유를 맞히는 문제로 이어집니다.';
+      elQnext.classList.add('show'); elQwhy.classList.add('show');
+    }
+  }else{
+    if(ok){
+      elQf.className='qfeed ok';
+      elQf.innerHTML='✅ 정확해요! 이유까지 알면 진짜 아는 것 — 원래 문제는 나중에 다시 나오니 그때 맞혀 보세요.';
+    }else{
+      elQf.className='qfeed no';
+      elQf.innerHTML='정답 이유: <b>'+Q.why.a+'</b><br>💡 '+Q.memo;
+    }
+    elQnext.classList.add('show');
+  }
+}
+function openQuiz(){ pause(); $('#qpanel').classList.add('open'); if(qCur<0) nextQuestion(); updateQuizUI(); }
+$('#qbadge').addEventListener('click', openQuiz);
+$('#qclose').addEventListener('click', function(){ $('#qpanel').classList.remove('open'); });
+$('#qnextbtn').addEventListener('click', nextQuestion);
+$('#qwhybtn').addEventListener('click', function(){
+  var Q=QUIZ[qCur];
+  qMode='why';
+  renderQ(Q.why.q, Q.why.a, Q.why.wrongs, '이어지는 문제 · 왜?');
+});
+var quizCard=$('#quizopen'); if(quizCard) quizCard.addEventListener('click', openQuiz);
+updateQuizUI();
+
+/* ============ 제미나이 질문하기 ============ */
+var GKEY=localStorage.getItem('rapids_gemini_key')||'';
+function chAdd(txt, who){
+  var d=document.createElement('div'); d.className='msg '+who; d.textContent=txt;
+  $('#chmsgs').appendChild(d); $('#chmsgs').scrollTop=99999;
+  return d;
+}
+function chShowKeys(show){ $('#chkeys').hidden=!show; }
+$('#chopen').addEventListener('click', function(){ pause(); $('#chatpanel').classList.add('open'); chShowKeys(!GKEY); $('#chinput').focus(); });
+$('#chclose').addEventListener('click', function(){ $('#chatpanel').classList.remove('open'); });
+$('#chkeybtn').addEventListener('click', function(){ chShowKeys(true); $('#chkeyinput').focus(); });
+$('#chkeysave').addEventListener('click', function(){
+  var v=$('#chkeyinput').value.trim();
+  if(!v){ return; }
+  GKEY=v; localStorage.setItem('rapids_gemini_key', v);
+  chShowKeys(false);
+  chAdd('🔑 API 키가 연결되었습니다! 이제 무엇이든 물어보세요.', 'bot');
+});
+$('#chform').addEventListener('submit', function(e){
+  e.preventDefault();
+  var q=$('#chinput').value.trim();
+  if(!q) return;
+  if(!GKEY){ chShowKeys(true); $('#chkeyinput').focus(); return; }
+  $('#chinput').value='';
+  chAdd(q, 'me');
+  var waiting=chAdd('생각 중…', 'bot');
+  var sc=sceneOf(Math.max(line,0));
+  var learned=GLOSS.filter(function(g){ return g.say<=maxSeen; }).map(function(g){ return g.n; }).join(', ');
+  var sys='너는 "파이썬 급류"라는 파이썬 입문 영상 강의의 친절한 조교야. 시청자는 완전 초보야. '+
+    '반드시 한국어로, 3~6문장 이내로, 쉬운 비유를 들어 설명해. 코드는 백틱 없이 짧게. '+
+    '지금 시청자가 보는 장면: "'+sc.name+'" / 현재 자막: "'+elSub.textContent+'" / 배운 용어: '+(learned||'아직 없음')+'. 질문: ';
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(GKEY),{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:sys+q}]}]})
+  }).then(function(r){ return r.json(); }).then(function(j){
+    var t=j && j.candidates && j.candidates[0] && j.candidates[0].content.parts[0].text;
+    waiting.textContent=t || ('답변을 받지 못했어요. '+(j.error? 'API 응답: '+j.error.message : 'API 키를 확인해 주세요 (🔑 버튼).'));
+  }).catch(function(){
+    waiting.textContent='연결에 실패했어요 — 인터넷과 API 키를 확인해 주세요 (아래 🔑 API 키 설정/변경).';
+  });
+});
+
+/* 초기 표시 */
+render(0); drawBar(0);
+$$('.lab').forEach(function(labEl){
+  $('.lab-out.before .txt',labEl).textContent='(재생 시작 후 표시)';
+  $('.lab-out.after .txt',labEl).textContent='(재생 시작 후 표시)';
+});
+})();
+</script>
+</body>
+</html>
